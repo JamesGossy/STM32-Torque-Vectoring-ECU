@@ -1,6 +1,6 @@
 <div align="center">
 
-# HIL Torque Vectoring
+# STM32 Torque Vectoring ECU
 
 **A four-wheel torque-vectoring race car, simulated and controlled in C.**
 
