@@ -1,0 +1,1 @@
+python -m easyeda2kicad --full --lcsc_id=C90770 --output C:\Users\JamesGoss\Documents\Projects\HIL-Torque-Vectoring\ECU_Hardware\libraries\easyeda2kicad --project-relative
