@@ -1,227 +1,31 @@
-# ---- Build temp directory (Windows/MSYS2 footgun fix) ----
+# Shortcuts for the ECU firmware. The real build is CMake in ECU_Firmware/.
 #
-# gcc's cc1/as write intermediate files (the .s, the .o temps) into a temp dir.
-# Two things bite on Windows and made builds fail intermittently with a bogus
-# exit 1 and NO diagnostic:
-#   1. MinGW gcc honours the Windows-style TMP/TEMP, NOT the POSIX TMPDIR, so the
-#      old `export TMPDIR := /tmp` here was silently ignored and gcc fell back to
-#      %TEMP% under the user profile.
-#   2. This repo lives under OneDrive, and %TEMP% is heavily scanned by Defender/
-#      OneDrive; the scanner races the assembler reading cc1's temp .s, so `as`
-#      intermittently "can't open" it and the whole compile fails with no message.
-# Fix: point all three temp vars at a fixed, local, NON-synced, low-scan dir
-# (C:\mk_tmp) and create it. Set both POSIX (TMPDIR) and Windows (TMP/TEMP) forms
-# so it works whether gcc reads one or the other. Override with
-# `make BUILD_TMP=/c/other/tmp` if C: is not writable. On Linux/CI this is just a
-# harmless extra tmp dir.
-BUILD_TMP ?= /c/mk_tmp
-BUILD_TMP_WIN := $(subst /c/,C:/,$(BUILD_TMP))
-export TMPDIR := $(BUILD_TMP)
-export TMP    := $(BUILD_TMP_WIN)
-export TEMP   := $(BUILD_TMP_WIN)
-
-# Create the temp dir before anything compiles (order-only-ish: a phony dep that
-# every build target can rely on having run, plus a belt-and-braces mkdir here).
-$(shell mkdir -p $(BUILD_TMP) 2>/dev/null)
-
-# This Makefile uses POSIX shell idioms (rm -rf, mkdir -p, the clang-format
-# detection below), so pin the shell to sh rather than let Windows make default
-# to cmd.exe. MSYS2/MinGW and every Unix provide /bin/sh.
+#   make firmware       STM32 build (needs arm-none-eabi-gcc, CMake, Ninja)
+#   make flash          program the board over SWD with STM32CubeProgrammer
+#   make sim            host build: ecu_sim and the tests
+#   make test           run the tests (add MC_DIR=... to include the motor controller interop test)
+#   make format         clang-format every hand-written C file
+#   make format-check   fail if anything is off-style, for CI
 SHELL := /bin/sh
+FW = ECU_Firmware
+MC_DIR ?=
+CLANG_FORMAT ?= clang-format
 
-# `all` is the default goal regardless of rule order (the generated-header rule
-# below would otherwise become the first target, so a bare `make` would only
-# regenerate track_data.h and stop).
-.DEFAULT_GOAL := all
+# The USB driver and syscalls are copied from the motor controller repo, so they keep its style.
+FORMAT_SRCS = $(filter-out %/usb_cdc.c %/usb_desc.c %/usb_desc.h %/usb_cdc.h %/usb_ll.h %/syscalls.c, \
+    $(wildcard $(FW)/app/*.[ch] $(FW)/hal/*.h $(FW)/hal/stm32g474/*.[ch] $(FW)/sim/*.[ch] \
+    $(FW)/tests/*.[ch] $(FW)/tests/interop/*.c))
 
-CC     = gcc
-CFLAGS = -Wall -Wextra -std=c11 -O2 -D_POSIX_C_SOURCE=199309L
-
-# Executable suffix: empty on Unix, .exe on Windows. Without this the run steps
-# (`&& $(EVAL)` etc.) fail on a native Windows build, where gcc emits a .exe.
-ifeq ($(OS),Windows_NT)
-  EXE_EXT = .exe
-else
-  EXE_EXT =
-endif
-
-HIL_BUILD = HIL_Firmware/build
-ECU_BUILD = ECU_Firmware/build
-HIL_SIM   = $(HIL_BUILD)/hil_sim$(EXE_EXT)
-ECU_OBJ   = $(ECU_BUILD)/torque_vectoring.o
-TEST_TV   = $(HIL_BUILD)/test_tv$(EXE_EXT)
-TEST_VM   = $(HIL_BUILD)/test_vehicle_model$(EXE_EXT)
-TEST_PP   = $(HIL_BUILD)/test_path_planning$(EXE_EXT)
-TEST_MC   = $(HIL_BUILD)/test_motion_control$(EXE_EXT)
-TEST_STEER = $(HIL_BUILD)/test_steer$(EXE_EXT)
-TEST_INT  = $(HIL_BUILD)/test_integration$(EXE_EXT)
-
-HIL_FLAGS = $(CFLAGS) \
-            -I HIL_Firmware/include \
-            -I shared \
-            -I ECU_Firmware/include
-
-ECU_FLAGS = $(CFLAGS) \
-            -I ECU_Firmware/include \
-            -I shared
-
-# Track cone data is generated from tracks/*.yaml (the source of truth) into
-# HIL_Firmware/include/track_data.h by tools/gen_tracks.py, which runs before any
-# compile. track_parser.c includes the generated header. Editing a YAML (or
-# adding tracks/<name>.yaml) regenerates it on the next build.
-PYTHON     ?= python
-TRACK_YAML  = $(wildcard tracks/*.yaml)
-TRACK_DATA  = HIL_Firmware/include/track_data.h
-
-$(TRACK_DATA): $(TRACK_YAML) tools/gen_tracks.py
-	$(PYTHON) tools/gen_tracks.py
-
-# Sources clang-format owns: every hand-written C file. track_data.h is
-# generated (gen_tracks.py controls its layout) so it is deliberately excluded.
-#
-# Find clang-format. Prefer one on PATH; otherwise fall back to the default
-# Windows LLVM install dir, since the LLVM/winget installer does not always add
-# it to the PATH of an already-open shell. Detection runs in the shell (GNU make
-# cannot handle the space in "Program Files" via $(wildcard)); the chosen path
-# may contain a space, so the recipes quote "$(CLANG_FORMAT)".
-#
-# This is a recursively-expanded (=) variable so the detection only runs when a
-# format target actually uses it - `make all`/`eval`/`test` never evaluate it,
-# and so never depend on a POSIX shell being present. Override with
-# `make format CLANG_FORMAT=/path/to/clang-format`.
-CLANG_FORMAT ?= $(shell command -v clang-format 2>/dev/null \
-    || for p in "/c/Program Files/LLVM/bin/clang-format.exe" \
-                "/c/Program Files (x86)/LLVM/bin/clang-format.exe"; do \
-         [ -x "$$p" ] && { echo "$$p"; break; }; \
-       done \
-    || echo clang-format)
-FORMAT_SRCS   = $(wildcard HIL_Firmware/src/*.c HIL_Firmware/include/*.h \
-                           ECU_Firmware/src/*.c ECU_Firmware/include/*.h \
-                           shared/*.c shared/*.h tests/*.c tools/*.c)
-FORMAT_SRCS  := $(filter-out HIL_Firmware/include/track_data.h, $(FORMAT_SRCS))
-
-# Steering is a kinematic feedforward + Stanley law in motion_control.c (the old
-# lqr_steer.c is gone). The four runtime tunables are the in-source defaults in
-# shared/tunables.c (from tools/tool_cmaes_sweep.py), so no -D overrides are
-# needed for a clean lap.
-HIL_SRCS = HIL_Firmware/src/main.c \
-           HIL_Firmware/src/vehicle_model.c \
-           HIL_Firmware/src/track_parser.c \
-           HIL_Firmware/src/path_planning.c \
-           HIL_Firmware/src/motion_control.c \
-           ECU_Firmware/src/torque_vectoring.c \
-           shared/tunables.c
-
-HIL_OBJS = $(patsubst %.c, $(HIL_BUILD)/%.o, $(notdir $(HIL_SRCS)))
-
-VM_SRCS = tests/test_vehicle_model.c \
-          HIL_Firmware/src/vehicle_model.c
-
-PP_SRCS = tests/test_path_planning.c \
-          HIL_Firmware/src/path_planning.c \
-          shared/tunables.c
-
-MC_SRCS = tests/test_motion_control.c \
-          HIL_Firmware/src/motion_control.c \
-          HIL_Firmware/src/vehicle_model.c \
-          HIL_Firmware/src/path_planning.c \
-          shared/tunables.c
-
-STEER_SRCS = tests/test_steer.c \
-             HIL_Firmware/src/motion_control.c \
-             HIL_Firmware/src/vehicle_model.c \
-             HIL_Firmware/src/path_planning.c \
-             shared/tunables.c
-
-TV_SRCS = tests/test_tv.c \
-          ECU_Firmware/src/torque_vectoring.c \
-          shared/tunables.c
-
-# Integration test: the full driver -> ECU -> vehicle -> track loop, so it pulls
-# in every module the sim wires together.
-INT_SRCS = tests/test_integration.c \
-           HIL_Firmware/src/motion_control.c \
-           HIL_Firmware/src/vehicle_model.c \
-           HIL_Firmware/src/track_parser.c \
-           HIL_Firmware/src/path_planning.c \
-           ECU_Firmware/src/torque_vectoring.c \
-           shared/tunables.c
-
-EVAL     = $(HIL_BUILD)/eval_lap$(EXE_EXT)
-EVAL_SRCS = tools/tool_eval_lap.c \
-            HIL_Firmware/src/motion_control.c \
-            HIL_Firmware/src/vehicle_model.c \
-            HIL_Firmware/src/track_parser.c \
-            HIL_Firmware/src/path_planning.c \
-            ECU_Firmware/src/torque_vectoring.c \
-            shared/tunables.c
-
-PERF      = $(HIL_BUILD)/perf_sim$(EXE_EXT)
-PERF_SRCS = tools/tool_perf_sim.c \
-            HIL_Firmware/src/motion_control.c \
-            HIL_Firmware/src/vehicle_model.c \
-            HIL_Firmware/src/track_parser.c \
-            HIL_Firmware/src/path_planning.c \
-            ECU_Firmware/src/torque_vectoring.c \
-            shared/tunables.c
-
-.PHONY: all run eval test perf clean format format-check
-
-all: $(TRACK_DATA) $(HIL_BUILD) $(ECU_BUILD) $(HIL_SIM) $(ECU_OBJ)
-
-$(HIL_BUILD) $(ECU_BUILD):
-	mkdir -p $@
-
-# HIL sim objects (track_parser.o needs the generated track_data.h)
-$(HIL_BUILD)/%.o: HIL_Firmware/src/%.c $(TRACK_DATA) | $(HIL_BUILD)
-	$(CC) $(HIL_FLAGS) -c -o $@ $<
-
-$(HIL_BUILD)/torque_vectoring.o: ECU_Firmware/src/torque_vectoring.c | $(HIL_BUILD)
-	$(CC) $(HIL_FLAGS) -c -o $@ $<
-
-# Shared runtime tunables (g_* gains, env overrides). Lives in shared/, linked by
-# the sim and every full-app build.
-$(HIL_BUILD)/tunables.o: shared/tunables.c | $(HIL_BUILD)
-	$(CC) $(HIL_FLAGS) -c -o $@ $<
-
-$(HIL_SIM): $(HIL_OBJS)
-	$(CC) $(HIL_FLAGS) -o $@ $^ -lm
-
-# ECU boundary check — compile torque_vectoring.c with only shared/ and its own
-# headers to verify the ECU has no accidental dependency on HIL_Firmware/.
-$(ECU_OBJ): ECU_Firmware/src/torque_vectoring.c | $(ECU_BUILD)
-	$(CC) $(ECU_FLAGS) -c -o $@ $<
-
-test: $(TRACK_DATA) $(HIL_BUILD)
-	$(CC) $(HIL_FLAGS) -o $(TEST_TV) $(TV_SRCS) -lm && $(TEST_TV)
-	$(CC) $(HIL_FLAGS) -o $(TEST_VM) $(VM_SRCS) -lm && $(TEST_VM)
-	$(CC) $(HIL_FLAGS) -o $(TEST_PP) $(PP_SRCS) -lm && $(TEST_PP)
-	$(CC) $(HIL_FLAGS) -o $(TEST_MC) $(MC_SRCS) -lm && $(TEST_MC)
-	$(CC) $(HIL_FLAGS) -o $(TEST_STEER) $(STEER_SRCS) -lm && $(TEST_STEER)
-	$(CC) $(HIL_FLAGS) -o $(TEST_INT) $(INT_SRCS) -lm && $(TEST_INT)
-
-run: all
-	TRACK=$(TRACK) $(HIL_SIM)
-
-# Headless lap evaluation: runs the full motion-control -> ECU -> vehicle loop
-# as fast as possible and prints lap-tracking metrics (mean/worst cross-track
-# error, cone contacts, lap time). Use it to catch driver regressions.
-eval: $(TRACK_DATA) $(HIL_BUILD)
-	$(CC) $(HIL_FLAGS) -o $(EVAL) $(EVAL_SRCS) -lm && TRACK=$(TRACK) $(EVAL)
-
-# Compute-speed benchmark: runs the tick loop flat out for 1 wall-clock second
-# and reports throughput. Pass a different budget as arg 1 (e.g. perf_sim 5).
-perf: $(TRACK_DATA) $(HIL_BUILD)
-	$(CC) $(HIL_FLAGS) -o $(PERF) $(PERF_SRCS) -lm && $(PERF)
-
-clean:
-	rm -rf $(HIL_BUILD) $(ECU_BUILD)
-
-# Reformat all hand-written C in place to the .clang-format house style.
+.PHONY: firmware flash sim test format format-check
+firmware:
+	cd $(FW) && cmake --preset default && cmake --build build
+flash: firmware
+	cd $(FW) && cmake --build build --target flash
+sim:
+	cd $(FW) && cmake --preset sim $(if $(MC_DIR),-DMC_FIRMWARE_DIR=$(abspath $(MC_DIR))) && cmake --build build-sim
+test: sim
+	cd $(FW) && ctest --preset sim
 format:
 	"$(CLANG_FORMAT)" -i $(FORMAT_SRCS)
-
-# Check formatting without editing (non-zero exit if any file is off-style).
-# Use in CI to keep the tree formatted.
 format-check:
 	"$(CLANG_FORMAT)" --dry-run --Werror $(FORMAT_SRCS)

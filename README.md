@@ -1,14 +1,13 @@
 <div align="center">
 
-# HIL Torque Vectoring
+# STM32 Torque Vectoring ECU
 
-**A four-wheel torque-vectoring race car, simulated and controlled in C.**
+**Firmware for a four-motor torque vectoring and derating ECU on an STM32G474.**
 
 <img src="docs/track.gif" alt="The simulated car driving a full lap of the FSG 2024 track" width="520">
 
-*One full lap of the Formula Student Germany 2024 track, in real time. The blue
-and yellow dots are the boundary cones. The cyan line is the racing line the car
-computed before it set off. The red box is the car, with a green trail behind it.*
+*A lap of the Formula Student Germany 2024 track in the full-physics simulation this ECU
+grew out of. Blue and yellow dots are cones, cyan is the racing line, the red box is the car.*
 
 </div>
 
@@ -16,359 +15,247 @@ computed before it set off. The red box is the car, with a green trail behind it
 
 ## What it does
 
-A racing car can have four electric motors, one on each wheel. Torque vectoring
-is the trick of giving each wheel a slightly different amount of power so the car
-turns exactly as much as the driver wants. Give the outer wheels more push and the
-inner wheels less, and the car rotates harder into the corner. Do the opposite and
-it straightens up.
+The ECU sits on the car's CAN bus with four STM32 motor controllers (one per wheel,
+from the STM32-Motor-Controller project). Every 10 ms it:
 
-This project builds the whole thing in software:
+1. reads the driver's pedals and steering, its own IMU, and each controller's speed,
+   temperature and bus voltage,
+2. decides whether torque is allowed at all (startup, faults, plausibility checks),
+3. works out how much torque the motors may give right now (derating),
+4. splits the driver's torque request across the four wheels to help the car turn
+   (torque vectoring),
+5. sends each controller its current setpoint over CAN.
 
-- a **model of the car** and its tyres,
-- a **virtual driver** that steers and sets the speed around a real race track,
-- and the **control code** that does the torque vectoring.
+It can also run in **HIL mode**, where the Formula Student simulator stands in for
+the car. The simulator sends steering, torque request, yaw rate and wheel speeds over
+CAN, and reads back the torque the ECU commanded. The real motor controllers on the
+bench take part exactly as they would on the car.
 
-They all run together 100 times a second. A visualiser then draws the car going
-round, which is what you see in the picture above.
+Battery management is out of scope for now: the bench runs from a lab power supply.
 
-The code is split the way a real team would split it. The car, the driver, and the
-control unit are kept in separate files, and the control code is walled off so it
-only ever sees the same sensor readings a real car's electronics would get. That
-is what **Hardware-in-the-Loop (HIL)** means: the simulation stands in for the real
-car, so you can test and tune the control code without one.
+```mermaid
+flowchart LR
+    pedals["Pedals & steering"] -->|analog| ecu
+    imu["IMU (LSM6DSV16X)"] -->|SPI| ecu
+    ecu["Torque vectoring ECU<br/>STM32G474"]
+    ecu <-->|"CAN 1 Mbit/s<br/>current setpoints / telemetry"| mc["Four motor controllers<br/>FL · FR · RL · RR"]
+    sim["Formula Student sim<br/>(HIL mode)"] <-->|"CAN via CANable<br/>steering, torque request,<br/>yaw rate, wheel speeds"| ecu
+    usb["PC console"] <-->|USB-C| ecu
 
-## Why I think it is worth a look
+    classDef controller fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
+    classDef drive fill:#ecfdf5,stroke:#059669,color:#064e3b
+    classDef interface fill:#fff7ed,stroke:#ea580c,color:#7c2d12
+    class ecu controller
+    class mc,pedals,imu drive
+    class sim,usb interface
+```
 
-- Three control systems work together to drive a measured race track in about
-  **27 seconds** with no mistakes: a steering controller, a speed planner, and the
-  torque-vectoring controller.
-- The car model is real, not a toy. It has per-wheel tyres that grip and then
-  slide, downforce and drag from the air, weight shifting under braking and
-  cornering, and a grip limit on every wheel.
-- The wall between "car" and "control code" is enforced by the build itself. If the
-  control code tries to reach into the simulation, the build breaks.
-- Nothing is judged by eye. A headless lap test and a set of unit tests run on every
-  push, and the build fails if the car gets slower or goes off the track.
-- The control gains are found by a search tool that throws away any setup that only
-  works at one exact point, so the result stays stable when things drift a little.
+## Repository layout
 
----
+```
+ECU_Hardware/            KiCad schematics and PCB, board requirements, sensor pinout
+docs/                    pictures from the earlier full-physics simulation
+ECU_Firmware/
+  app/                   the application, no hardware access (runs on the board and the PC)
+    app.c                100 Hz control step and the drive state machine
+    torque_vectoring.c   the yaw-rate torque vectoring law
+    derate.c             torque limits from temperature, speed and bus voltage
+    driver_inputs.c      pedals and steering, with the Formula Student plausibility rules
+    motors.c             the motor controller CAN protocol, client side
+    hil.c                inputs from the HIL simulator
+    imu.c, gps.c         LSM6DSV16X gyro/accel driver, NMEA reader
+    console.c            USB text console
+    config.h             every number: car, sensors, limits, derating thresholds
+    can_protocol.h       every CAN message (shared with the simulator)
+  hal/hal.h              what the app needs from a board
+  hal/stm32g474/         register-level drivers: clocks, ADC+DMA, SPI, UART, FDCAN, USB
+  sim/                   the board in memory, and ecu_sim for simulator runs
+  tests/                 unit and whole-application tests
+Makefile                 shortcuts for the CMake builds, tests and formatting
+```
 
-## The idea behind torque vectoring
+The application only ever talks to `hal.h`. On the board that is the STM32 drivers;
+on a PC it is `sim/sim.c`. The same application code is what gets tested, what runs in
+the simulator, and what runs on the car.
 
-When you turn the wheel, you are asking the car to rotate at a certain rate. This
-rate is called the **yaw rate**. A normal car with one engine cannot do much if it
-is rotating too slowly or too quickly for the corner. A car with four motors can fix
-it on the fly.
+## Torque vectoring
 
-Without help, the car does not turn enough for a tight corner and runs wide of
-where you wanted it to go. The fix is to give the **outer** wheels more torque and
-the **inner** wheels less. The difference twists the car further into the corner.
-The controller measures how fast the car is really rotating, compares it to how
-fast it should be rotating, and keeps adjusting the left and right torque to close
-the gap.
+The steering angle and speed give the yaw rate the driver is asking for (a bicycle
+model). The gyro gives the yaw rate the car really has. The difference moves torque
+from one side of the car to the other:
 
-Here is the car at the tightest corner of the lap, the hairpin, with the live
-torque bars from the visualiser beside it. The outer (left) wheels are driving and
-the inner (right) wheels are braking on regen, which is what swings the car round:
+```
+base            = request / 4, inside the derated limits
+target yaw rate = speed * tan(steering * 0.23) / wheelbase
+correction      = 4 Nm per rad/s * (target - measured), at most 4 Nm,
+                  and never more than the room both sides have left
+left wheels     = base - correction
+right wheels    = base + correction
+```
+
+The total torque never changes, only how it is shared. It works under regen too. The
+law and gains are the same as the simulator's own software torque vectoring, so an HIL
+lap can be compared directly with a pure simulation lap.
+
+This is what it looks like on a car. Both pictures come from the full-physics simulation
+this project started as, which used a grip-aware PID version of the same idea. At the
+hairpin the outer wheels drive and the inner wheels regen, which swings the car round:
 
 <div align="center">
 <img src="docs/tv_hairpin.png" alt="The car at the hairpin with the four wheel-torque bars showing the left/right split" width="620">
 </div>
 
-You can also see it over time. In the real torque readings from one corner, the
-four lines start together on the straight, then fan apart through the corner as
-each wheel is given its own torque:
+Through a corner the four wheel torques start together, then fan apart as each wheel is
+given its own share:
 
 <div align="center">
 <img src="docs/torque_corner.png" alt="The four wheel torques fanning apart through a corner" width="680">
 </div>
 
----
+## Derating
 
-## How the loop fits together
+One factor covers the whole car, so derating never adds a yaw moment of its own.
 
-Every tick, which happens 100 times a second, the data moves through four stages in
-order. The output of each stage feeds the next, then the cycle repeats.
+| Input | Starts at | Zero torque at | Limits |
+| --- | --- | --- | --- |
+| Controller FET temperature | 80 C | 95 C (controllers trip at 100 C) | drive and regen |
+| ECU board temperature | 70 C | 85 C | drive and regen |
+| Motor speed (from the controllers) | 70 % of 10k rpm | 10k rpm | drive |
+| Bus voltage, sagging | 14 V | 10 V (controllers trip at 8 V) | drive |
+| Bus voltage, rising | 50 V | 56 V (controllers trip at 60 V) | regen |
+| Car speed | 2 m/s | standstill | regen |
+
+Regen fades out as the car stops, because at standstill a regen request would drive the
+motors backwards. The rising-bus limit matters on the bench: a lab supply cannot absorb regen, so the bus
+voltage climbs. The speed limit uses the speed the controller measures, because that
+protects the real motor. An unloaded bench motor settles just under its limit instead of
+running away. All thresholds are in `config.h`.
+
+## When torque is allowed
+
+| State | Meaning |
+| --- | --- |
+| `STARTUP` | first second: the gyro bias is measured, so the car must be still |
+| `STANDBY` | ready, no torque. Controllers are kept idle |
+| `DRIVE` | torque is sent every 10 ms |
+
+To arm, press the brake with the throttle released and hold it for 1 s in standby (a
+stand-in until the car has a ready-to-drive button). After any disarm the brake has to be
+lifted and pressed again. In HIL mode the simulator arms it instead, with a fresh drive
+request. Arming needs every
+controller online and healthy, main power present (so the pedal sensors are powered), a
+working IMU and a healthy CAN bus.
+
+Any of those failing while driving drops the ECU back to `STANDBY`. Two pedal problems
+only zero the torque while they last, as the Formula Student rules ask:
+
+- **Throttle sensor disagreement:** the two throttle sensors differ by more than 10 %
+  for over 100 ms.
+- **Brake with throttle:** the brake and more than 25 % throttle are pressed together.
+  Torque stays at zero until the throttle drops below 5 %.
+
+Torque only goes out once all four controllers are running, so one side can never drive
+alone. On disarm the ECU sends zero current and an idle request to every controller at
+once, and keeps sending zero current while disarmed. The controllers also stop by
+themselves 250 ms after their setpoints stop, so a crashed or unplugged ECU is safe. The
+watchdog resets the ECU after 100 ms.
+
+## CAN bus
+
+Classic CAN at 1 Mbit/s, 11-bit ids of the form `(node << 5) | message`, the scheme the
+motor controllers already use. Floats are little endian. The full list is in
+[`can_protocol.h`](ECU_Firmware/app/can_protocol.h).
+
+| Node | Who | Messages |
+| --- | --- | --- |
+| 1 to 4 | motor controllers FL, FR, RL, RR | ECU sends `SET_STATE`, `SET_IQ`. They send heartbeat, iq and speed, bus volts and temperature |
+| 16 | this ECU | `STATUS` (state, inhibit bits, derating) and `YAW` (target and measured) every 10 ms |
+| 16 | HIL simulator | `DRIVER`, `WHEELS_F`, `WHEELS_R`, then `CONTROL` last each tick |
+
+Wheel torque is sent as controller current: 1.47 Nm per amp maps the car motor's 29.4 Nm
+onto the controller's 20 A limit. The left motors are mounted mirrored, so their current
+has the opposite sign. Set each controller's node id from its own console with `node <id>`.
+
+## Build, flash and test
+
+Needs CMake and Ninja, plus `arm-none-eabi-gcc` for the board (STM32CubeCLT has all
+three) and a host C compiler for the tests.
 
 ```
-  STAGE 1   DRIVER          motion_control.c
-            Looks at the racing line ahead. Picks a steering angle.
-            Picks a target speed for the corner coming up. Asks for
-            a total amount of torque.
-                |
-                |   only sensor readings are allowed to cross this line
-                v
-  STAGE 2   CONTROL UNIT    torque_vectoring.c
-            Reads speed, yaw rate, steering, and wheel speeds. Splits
-            the total torque into four wheel torques to steer the car
-            with power.
-                |
-                v
-  STAGE 3   CAR             vehicle_model.c
-            Applies the four torques and the steering. Works out the
-            tyre forces and updates where the car is and how fast.
-                |
-                v
-  STAGE 4   TRACK
-            Moves the car along the lap and counts laps. Sends one
-            line of data to the visualiser, then the loop starts again.
+make firmware     # ECU_Firmware/build/tv_ecu.elf, .hex and .bin
+make flash        # over SWD with an ST-LINK and STM32CubeProgrammer
+make test         # unit tests and whole-application tests on the PC
+make test MC_DIR=../STM32-Motor-Controller/controller_firmware   # also the controller interop test
 ```
 
----
+The interop test builds the real motor controller firmware for the PC and runs it
+against this ECU. It checks that the ECU arms the controller, that the controller follows
+the commanded current, that speed derating holds a free motor near its limit, and that
+the controller stops when drive is switched off and when the ECU goes away.
 
-## The maths, kept simple
+## USB console
 
-You do not need the equations to follow this. Each one is a single short idea.
+Plug in USB-C and open the virtual COM port with any terminal.
 
-### 1. Find the racing line
+| Command | Does |
+| --- | --- |
+| `status` | state, inputs, torques, derating and any inhibit reasons |
+| `stream on` / `stream off` | the status line every 100 ms |
+| `motors` | one line per motor controller |
+| `gps` | the latest GPS fix |
+| `off` | stop sending torque |
+| `clear` | ask every controller to clear its faults |
+| `estop` | broadcast the controller e-stop |
 
-The track is just a list of cone positions. Before the car moves, the planner works
-out the line it will follow, in three steps:
+## HIL testing with the Formula Student simulator
 
-1. **Pair the cones.** Match each left cone to its nearest right cone. Each pair is
-   a gate the car has to drive through.
-2. **Find the middle.** Take the midpoint of each gate and space the midpoints evenly,
-   2.5 metres apart. That gives a line down the middle of the track.
-3. **Smooth it.** Move the line side to side, but only inside the cones, to make it
-   bend as gently as possible. A straighter line through a corner is a wider arc, and
-   a wider arc can be taken faster.
+```
+PC: Formula Student sim --TCP-- can_bridge.py --USB-- CANable 2.0 --CAN-- ECU board
+                                                                    \-- motor controllers
+```
 
-### 2. How fast can a corner be taken
+1. Wire the CANable, the ECU and the motor controllers on one bus, terminated at both
+   ends (the ECU has fixed split termination). Power the ECU and controllers from the
+   bench supply.
+2. Calibrate each motor controller and give it its node id (1 FL, 2 FR, 3 RL, 4 RR).
+   Controllers you do not have are played by the simulator.
+3. Start the bridge, with the CANable's COM port:
+   `python tools/can_bridge.py --channel COM5`
+4. Run the simulator with `HIL=1`, for example `HIL=1 python visualiser.py` or
+   `HIL=1 make eval` in the simulator repo.
 
-A corner is part of a circle. The grip of the tyres sets how hard the car can pull
-sideways. That gives a speed limit for every point on the line:
+The simulator listens for 0.3 s to find which controllers are real, waits for the ECU to
+reach standby, arms it, then drives. It drives the car model with the current the ECU
+commanded; set `HIL_TORQUE=measured` to use the current the real controllers report
+instead (useful with loaded motors). `HIL_FET_TEMP` and `HIL_BUS_V` change what the
+simulated controllers report, to try derating.
 
-> **corner speed = square root of ( grip times corner radius )**
+Without any hardware, `ecu_sim` (built by `make sim`) plays the ECU on the PC and the
+simulator talks to it in lock-step. The simulator's `make test-hil` runs its whole lap
+matrix that way.
 
-A tighter corner has a smaller radius, so a lower speed. This one rule, used along
-the whole line, is what sets the lap time.
+**On the bench:** the motors are unloaded, so any torque spins them up until speed
+derating holds them just under 10k rpm. Keep them guarded and clamped down.
 
-### 3. Plan the speed, so the car brakes in time
+## Where it came from
 
-Knowing the speed limit at each point is not enough. The car also has to start
-braking early. The planner goes over the line twice:
-
-- **Forward pass:** set every point to its corner speed limit.
-- **Backward pass:** start at each slow corner and walk backwards, pulling the speed
-  down earlier and earlier, so the car is already slow enough when it arrives.
-
-This is the same thing a driver does: brake before the corner, not in it. You can see
-it working in the real speed data below. The green line (actual speed) tracks the
-yellow line (the plan) closely, braking for every corner and pulling away on the
-straights:
+This repo started as a full-physics HIL simulation in C: a four-corner car model with
+Pacejka tyres, load transfer and aero, a Stanley steering driver, a racing-line planner,
+and a PID torque vectoring controller walled off behind the same kind of sensor
+interface a real ECU would have. It lapped the FSG 2024 track in about 27 seconds, with
+the actual speed following the planned speed closely:
 
 <div align="center">
 <img src="docs/speed_trace.png" alt="Actual speed tracking the planned target speed over one lap" width="680">
 </div>
 
-### 4. Steering
+That simulation is still in the git history. The controller has now moved onto real
+hardware, and HIL testing uses the Formula Student simulator instead.
 
-At every moment the controller knows two things that are wrong:
+## Not done yet
 
-- **how far the car is sideways off the line** (cross-track error),
-- **how much the car is pointing the wrong way** (heading error).
-
-The steering is a **Stanley** law plus a curvature feedforward. It adds up four
-simple terms into one steering angle:
-
-- a **feedforward** that starts turning the wheel for the corner it can already see,
-  worked out from the corner radius and the car's understeer, so it does not wait
-  for an error to show up,
-- a **heading** term that lines the car up with the path,
-- a **cross-track** term that pulls the car back onto the line,
-- a **yaw-rate damping** term that stops the car rotating faster or slower than the
-  corner needs, which is what keeps it from washing wide at speed.
-
-The feedforward understeer comes straight from the tyre model, so it needs no tuning.
-The whole law has one knob, the cross-track gain. The car stays within about
-**16 centimetres** of the ideal line the whole way round, with no off-track ticks.
-
-### 5. Torque vectoring, the control unit's job
-
-This is the code that would run on the real car. Here is what it does, step by step.
-
-**a. Work out how fast the car should be rotating.** From the steering angle and the
-speed:
-
-> **wanted yaw rate = speed times tan(steering) / (wheelbase + understeer factor times speed squared)**
-
-The speed-squared part is honest about the fact that a fast car cannot rotate as
-sharply as the steering angle alone suggests.
-
-**b. Work out how fast it really is rotating.** Read the yaw-rate gyro.
-
-**c. Get ahead of the corner.** The moment the steering moves, start shifting torque
-outward. Do not wait for an error to build up. This is the single biggest reason the
-cornering is clean.
-
-**d. Correct the rest with PID feedback:**
-
-> **bias = feedforward + (Kp times error) + (Ki times the build-up of error) + (Kd times how fast the error is changing)**
-
-- **Kp** reacts to the error right now.
-- **Ki** removes a small error that never quite goes away.
-- **Kd** softens the turn-in so the car does not overshoot.
-
-That gives the wanted left-right torque difference, the bias.
-
-**e. Split it four ways, by grip.** The controller estimates how much torque each
-wheel's tyre can take right now, from the load on it. A loaded outer tyre can take
-more, an unloaded inner one less. It then shares out the driver's torque to hit the
-bias first and the total second, starting from those per-wheel grip ceilings. So the
-turning effect goes to the tyres that can actually deliver it, and authority shifts
-to the loaded outer and rear corners on its own.
-
-**f. Stay within what the motors can do.** Each wheel is capped at what its motor can
-deliver, up to 29.4 Nm driving and the same in regen braking. If a wheel hits its
-limit, the leftover is pushed onto the other wheels so the turning effect is kept as
-much as the motors allow.
-
-One nice detail: this works while braking too. The car has no brake discs. It slows by
-running the motors backwards. The same left and right split is used while braking, so
-the car is still steered with power on the way into a corner, not just on the way out.
-
-### 6. The car and its tyres
-
-So the controller has something realistic to control, the car is modelled with three
-freedoms (forward, sideways, and rotation), worked out for each wheel:
-
-- **Tyres that grip then slide.** Grip rises as you lean on a tyre, then falls off when
-  you ask too much. That is the real reason cars slide.
-- **Air.** Downforce presses the car down for more grip at speed. Drag slows it on the
-  straights.
-- **Weight moving around.** Braking throws weight onto the front, cornering onto the
-  outside, and that changes how much grip each wheel has.
-- **A grip limit per wheel.** A wheel cannot do its hardest cornering and its hardest
-  acceleration at the same time. Spend grip on one and there is less for the other.
-
-There is one grip number for the whole project, derived from the tyre and the
-downforce. The same number sets the corner speed, the braking budget, and the point
-where the throttle backs off under cornering load. Change the tyre and all three move
-together, because there is only one place to change.
-
-The numbers match a real Formula Student car (the M25): 260 kg, 1.55 m wheelbase, four
-29.4 Nm motors through a 15.47 to 1 gearbox.
-
----
-
-## See it run
-
-**1. Build the C simulation** (needs `gcc` and `make`; on Windows use MSYS2):
-
-```
-make
-```
-
-This builds `HIL_Firmware/build/hil_sim`.
-
-**2. Run the live visualiser** (needs Python 3 and pygame):
-
-```
-pip install pygame
-python visualiser.py
-```
-
-The visualiser starts the simulation itself and opens a window. The track is on the
-left and a live data panel is on the right, with speed against target, yaw rate, an
-understeer and oversteer bar, a slip gauge, a friction-circle plot, and a bar chart of
-the four wheel torques.
-
-| Key | What it does |
-|-----|--------------|
-| `T` | Turn torque vectoring on or off, and watch the lap time change |
-| `[` `]` | Lower or raise the torque-vectoring gain |
-| `M` | Switch between the whole-track map and a camera that follows the car |
-| `F` | Fullscreen |
-| `Q` or `Esc` | Quit |
-
-Worth trying: press `T` to turn torque vectoring off, and watch the four torque bars
-go equal while the lap time gets worse. Press `]` to turn the gain up high and watch
-the car get twitchy.
-
-The header GIF, the hairpin shot, and the plots above are all made from real sim
-data with `python tools/tool_make_track_gif.py`, `python tools/tool_make_tv_shot.py`,
-and `python tools/tool_make_plots.py`.
-
----
-
-## How it is tested
-
-Changes are measured, not guessed at.
-
-```
-make test     unit tests: signs, limits, anti-windup, and the HIL wall
-make eval     drives one full lap with no window and prints the numbers
-```
-
-`make eval` runs the whole driver, control unit, and car loop over the real track as
-fast as the machine can, and prints a lap report. A good change keeps the car on the
-track, finishes the lap, and does not make the lap slower or the line worse. The same
-two commands run in CI on every push, and the build fails if the car cannot get round.
-So a control mistake cannot slip in without someone noticing.
-
-The control gains are found by `tools/tool_cmaes_sweep.py`. It scores each setup by
-its **worst nearby neighbour**, not its best case, which throws away setups that only
-work at one exact point and fall apart the moment anything drifts. The shipped gains
-drive two different tracks cleanly and survive a 3 percent wobble on every parameter.
-
----
-
-## Project layout
-
-```
-HIL-Torque-Vectoring/
-  Makefile                    Builds the sim, the tests, and the tools
-  visualiser.py               Live window. Starts the sim and draws it.
-
-  shared/                     Code that BOTH the car and the control unit can use
-    tv_interface.h            The data that crosses the HIL wall
-    vehicle_config.h          Physical constants (mass, size, tyres)
-    grip_model.h              The one grip number, derived from the tyre and aero
-    tunables.c / tunables.h   The control gains (steering, speed, TV)
-
-  HIL_Firmware/               The car side, the simulation
-    src/main.c                The 100 Hz loop. Sends data out.
-    src/vehicle_model.c       The per-wheel physics
-    src/path_planning.c       Builds the racing line from the cones
-    src/motion_control.c      The virtual driver (steering and speed)
-    src/track_parser.c        Loads a cone layout, chosen at runtime
-
-  ECU_Firmware/               The control side. Only sees sensor data.
-    src/torque_vectoring.c    The torque-vectoring algorithm
-
-  tracks/                     Cone layouts as YAML (fsg2024, fse2024)
-  tests/                      Unit tests (make test)
-  tools/                      Lap test, gain search, GIF and plot makers, CI helpers
-```
-
-The HIL wall is enforced by the build. `torque_vectoring.c` is compiled with only its
-own header and `shared/` available, so it cannot reach into the simulation's code, just
-as it could not on real hardware.
-
-Tracks can be swapped at runtime: `TRACK=fse2024 python visualiser.py`, or
-`TRACK=fse2024 make eval`. Drop a new `tracks/<name>.yaml` file in and rebuild to add
-your own.
-
----
-
-## What is left out on purpose
-
-To keep it readable rather than make a full commercial simulator, this leaves out
-suspension movement and body roll, the electrical behaviour of the motors and
-inverters, the battery, and separate brake discs (the car brakes on the motors only).
-It is built to show how the control logic works and to check that the control unit
-behaves, not to predict real lap times to the millisecond.
-
----
-
-## Platform notes
-
-- **Visualiser:** Python 3 and pygame (`pip install pygame`).
-- **Linux and macOS:** builds with any `gcc`.
-- **Windows:** use [MSYS2](https://www.msys2.org) with the MinGW-w64 toolchain:
-  ```
-  pacman -S mingw-w64-x86_64-gcc make
-  ```
-  Build with `make` in the MinGW 64-bit shell, then run `python visualiser.py` from any
-  terminal that has Python on its PATH.
+- Battery and BMS messages, and derating from state of charge.
+- Pedal and steering calibration stored in flash (it is in `config.h` for now).
+- A ready-to-drive button input.
+- GPS is read and shown on the console, but not used by the controller.
+- The IMU interrupt pin and the GPS PPS pin are wired but not used.

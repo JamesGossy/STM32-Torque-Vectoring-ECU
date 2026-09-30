@@ -25,222 +25,58 @@
 
 # Working in this repo
 
-HIL torque-vectoring race-car simulation in C. Three roles kept in separate
-files on purpose (see README.md): the **driver** (`HIL_Firmware/src/motion_control.c`),
-the **car** (`HIL_Firmware/src/vehicle_model.c`), and the **ECU**
-(`ECU_Firmware/src/torque_vectoring.c`). The ECU only ever sees a `SensorData`
-struct — that HIL boundary is enforced by the `ECU_OBJ` build target; don't let
-the ECU include anything from `HIL_Firmware/`.
+Firmware for the torque vectoring and derating ECU (STM32G474CEU6) described in
+`ECU_Hardware/`. It commands four STM32 motor controllers over CAN. The old
+full-physics HIL simulation that used to live here was removed; HIL testing now uses
+the Formula Student simulator repo, which talks to this ECU over CAN.
 
-## Evaluating driver / vehicle / controller changes
+## Layout and the one rule that matters
 
-After ANY change to the motion controller, speed planner, vehicle model, or
-tuning gains, run the headless lap evaluator — do not judge a driver change by
-eye in the visualiser, and do not rely only on the unit tests (they check
-clamping and signs, not whether the car actually makes it round):
+- `ECU_Firmware/app/` is the whole application and must never touch hardware. It only
+  includes `hal/hal.h`. The same code runs on the board (`hal/stm32g474/`) and on a PC
+  (`sim/sim.c`), which is what makes the tests and HIL runs meaningful.
+- Every number lives in `app/config.h`. Every CAN id and payload lives in
+  `app/can_protocol.h`.
+- `app/can_protocol.h` is copied byte for byte into the simulator repo as
+  `shared/can_protocol.h`. Change both together.
+- The motor controller protocol (ids, payloads, states) is defined by the
+  STM32-Motor-Controller firmware (`controller_firmware/app/can_proto.h`). Match it, do
+  not change it from this side.
+- `hal/stm32g474/usb_cdc.c`, `usb_desc.c`, `usb_ll.h`, `syscalls.c`, the CMSIS headers
+  and the startup file are copied from the motor controller repo and keep its style.
+  They are excluded from `make format`.
+
+## Checks after any change
 
 ```
-make eval
+make test         # host build, unit and whole-application tests
+make firmware     # must build with no warnings
+make format-check
 ```
 
-This runs the full motion-control → ECU → vehicle loop over the FSG 2024 track
-as fast as possible (no real-time sleep) and prints lap-tracking metrics. A good
-change keeps **off-track ticks at 0** and **a completed lap**, and should not
-regress mean/worst cross-track error or lap time. The source is
-`tools/tool_eval_lap.c`; the machine-readable summary is the `RESULT ...` line.
+With the motor controller repo next to this one, also run
+`make test MC_DIR=../STM32-Motor-Controller/controller_firmware`. It builds the real
+controller firmware for the PC and runs it against this ECU through `ecu_sim`.
 
-Keep evaluation runs at/under **50 s of simulated time** (one lap is ~26.5 s) —
-the evaluator already caps at 50 s. Longer runs waste time without adding
-signal.
+After changing torque vectoring, derating, the state machine or the protocol, run the
+simulator's lap matrix through this firmware: build `ecu_sim` (`make sim`), then in the
+Formula-Student-Autonomous-Sim repo run `make test-hil`. It must keep 0 off-track ticks
+and at least two laps on both tracks.
 
-A `TRACE=1 make eval`-style run (set the env var, then run the eval binary
-`HIL_Firmware/build/eval_lap`) prints a per-tick trace (waypoint, curvature,
-cross-track error, speed, steer, slip) to localise where the car goes wide.
+## Key facts
 
-Setting `PP_DEBUG=1` on the eval binary prints one `PP_RESULT` line per track
-build: centreline lap time, optimised lap time, the gain, passes used, and a
-`converged` flag (1 means coordinate descent refined to the step floor, 0 means
-it hit the pass cap first). A `PP_WARN` line fires if the optimised line is
-slower than the centreline or the search did not converge. Use it to check the
-racing-line optimiser after touching `path_planning.c` or `g_RACING_MARGIN`.
-
-### Parameter sweeps
-
-Every tuning gain is wrapped in `#ifndef` in its defining header, so it can be
-overridden at compile time with `-D` without editing the source. The optimiser
-is `tools/tool_cmaes_sweep.py`: a CMA-ES search that scores
-each candidate by its **worst ±3% perturbed neighbour**, so it finds a config in
-a clean basin rather than a knife-edge that only laps cleanly at the exact point
-(a naive "fastest clean lap" overfits the deterministic evaluator and goes
-off-track under tiny drift). It tunes one or more tracks (`--tracks`, default
-both) and scores by the worst track. `tools/tool_robust_check.py` audits a config's
-robustness. When picking a "fastest" config, only accept one with **0 off-track
-ticks** that also survives perturbation — faster laps that clip apex cones, or
-that are clean only at one point, are not valid.
-
-The tuned values are the in-source defaults (no `-D` needed for the clean lap).
-
-## Code style
-
-C is formatted with clang-format (`.clang-format` in the repo root; house style
-is WebKit-based — Allman braces on functions, attached on control flow, 4-space
-indent, 100-col). `make format` reformats every hand-written C file in place;
-`make format-check` verifies without editing (non-zero exit if anything is
-off-style — suitable for CI). The generated `track_data.h` is excluded (its
-layout is owned by `gen_tracks.py`). clang-format does not preserve hand-aligned
-columns inside expressions, so don't bother manually aligning operands — it will
-be normalised.
-
-## CI
-
-`.github/workflows/ci.yml` builds, runs `make test`, then runs `make eval` and
-posts the lap-evaluation table to the GitHub Actions run summary. CI **fails**
-if the car does not complete a lap or goes off-track, so a driver regression is
-caught automatically.
-
-## Build note (Windows)
-
-**Root cause of the recurring "gcc fails with exit 1 and no error message".**
-MinGW gcc writes cc1/as intermediates to a temp dir, and on this machine two
-things conspired:
-- gcc honours the **Windows-style `TMP`/`TEMP`, not the POSIX `TMPDIR`**, so the
-  old `export TMPDIR := /tmp` was silently ignored and temps landed in `%TEMP%`
-  under the user profile.
-- This repo is under **OneDrive**, and `%TEMP%` is heavily scanned by Defender/
-  OneDrive. The scanner races `as` reading cc1's temp `.s`, so the assemble step
-  intermittently fails to open its own temp and the build dies with **no
-  diagnostic and a bogus exit 1** (the output file sometimes still appears —
-  proof the failure is in the temp/exit-status path, not the code).
-
-The Makefile now fixes this: it points `TMPDIR` **and** `TMP`/`TEMP` at a fixed,
-local, non-synced dir (`C:\mk_tmp`, auto-created) so cc1/as temps never touch
-OneDrive or `%TEMP%`. Just run `make` / `make eval` / `make test` normally.
-Override the dir with `make BUILD_TMP=/c/other/tmp` if `C:` is not writable. CI
-runs on Ubuntu where none of this applies.
-
-If you must invoke gcc by hand outside make, set the **Windows-style** temp (not
-just `TMPDIR`) on the same line, e.g.
-`TMP='C:/mk_tmp' TEMP='C:/mk_tmp' gcc -std=c11 -O2 -I ... -lm`.
-
-Note: independent of the above, the sandboxed shell can enter a degraded state
-mid-session where gcc cannot spawn its subprocesses at all (even `gcc -S` of a
-one-line file fails, while `cc1 --version` and `as --version` run fine). That is
-an environment condition, not a repo problem — start a fresh shell/session.
-
-## Key facts and gotchas
-
-These are things that are easy to get wrong and slow to rediscover.
-
-- **The track layout is selectable at runtime via the `TRACK` environment
-  variable** (default `fsg2024`). The cone layouts live in `tracks/*.yaml` (the
-  source of truth); `tools/gen_tracks.py` turns every YAML into
-  `HIL_Firmware/include/track_data.h` at build time (the Makefile runs it before
-  compiling — `track_data.h` is generated, do not edit it by hand).
-  `HIL_Firmware/src/track_parser.c` includes the generated data and `track_init()`
-  picks a layout by name, so every entry point (sim, `make eval`, perf) and the
-  visualiser switch with no call-site changes — e.g. `TRACK=fse2024 make eval`.
-  Add a track by dropping another `tracks/<name>.yaml` in and rebuilding.
-  (`gen_tracks.py --check` fails if the committed header is stale — useful in CI.)
-
-- **The shipped gains are a single shared set tuned to lap BOTH `fsg2024` and
-  `fse2024` cleanly** (0 off-track, robust to ±3% jitter), not the fsg2024-only
-  optimum. It's a min-max compromise: forcing `fse2024`'s tighter corners clean
-  costs `fsg2024` ~0.7 s vs. its solo best (fsg2024 ~27.1 s, fse2024 ~22.1 s).
-  Re-tune the shared set with `tools/tool_cmaes_sweep.py` (CMA-ES with robust
-  worst-neighbour scoring; it evaluates every candidate on each track in
-  `--tracks` and scores by the worst track). After tuning, always confirm 0
-  off-track on **every** track, e.g. `TRACK=fse2024 make eval` as well as the
-  default. If you only care about one layout, pass a single name, e.g.
-  `tool_cmaes_sweep.py --tracks fsg2024`.
-
-- **Every number in the project lives in exactly one of two files.**
-  `shared/vehicle_config.h` holds everything MEASURABLE on the car or DERIVED from
-  it — mass, geometry, tyre/aero coefficients, motor torque limits, top speed,
-  gear ratio, the 100 Hz control period, the planner's structural array CAPS, and
-  derived quantities (`ACK_NOMINAL` = mid of the Ackermann ratios, `DRIVER_TORQUE_NM`
-  = `N_MOTORS × MAX_MOTOR_TORQUE_NM`). `shared/tunables.c` holds every controller
-  GAIN as a `g_*` global (there is no `shared/constants_config.h` — it was deleted
-  and split between these two files). The classification rule is **"is its value a
-  performance/behaviour CHOICE?"** — if tuning it trades lap time, stability or
-  cleanliness, it is a gain and lives in `tunables.c` with a `TUNE_*` env override
-  and a slot in the sweep's `PARAMS`. That deliberately includes the steering caps
-  (`g_MAX_STEER_RAD`/`g_MAX_STEER_RATE_RADS` — the sim enforces no mechanical lock,
-  so they are driver choices), the braking-effort cap (`g_MAX_BRAKE_DECEL_MS2`, a
-  choice below the regen limit), the longitudinal P/I gains, the speed-planner scan
-  DEPTH (`g_SPEED_PLAN_STEPS`/`g_NEAREST_SEARCH_*`, ints clamped to the structural
-  caps), the cone safety net, the racing-line radius-floor opening
-  (`g_PP_RADIUS_FACTOR`), and the TV PID/FF fractions (incl. `g_TV_I_MAX_FRAC`, the
-  integral cap as a fraction of motor torque). Only **two** gains are FIXED (not
-  swept) because they are NOT performance choices: `g_TV_YAW_DEADBAND` (a
-  sensor-noise floor) and `g_TV_K_US` (an empirical understeer term whose linear
-  derivation collapses to ~0 for this near-neutral car). The headline swept knobs
-  are `g_GRIP_USE`, `g_K_STANLEY`, `g_K_DAMP`, `g_RACING_MARGIN`, `g_KP_YAW`; the
-  full set (~26) is in `tunables.c` and the multi-track sweep's `PARAMS`. **Much
-  else is DERIVED** from `vehicle_config.h`: the single grip model `peak_lat(v)` in
-  `shared/grip_model.h` feeds the speed planner, friction-circle budget and
-  throttle cut; the steering feedforward/understeer come from the Pacejka
-  stiffness; the drag feedforward from the aero constants; `ACK_NOMINAL` is the
-  midpoint of the Ackermann ratios; the racing-line radius floor from the steering
-  geometry. (This replaced an earlier 16-tunable set whose steering was a
-  model-based LQR; see the steering note below for the pace trade-off.)
-
-- **Tools live in `tools/`, not `tests/`, and are named `tool_*`**
-  (`tool_eval_lap.c`, `tool_perf_sim.c`, `tool_cmaes_sweep.py` /
-  `tool_robust_check.py`, the README-figure scripts `tool_make_plots.py` /
-  `tool_make_track_gif.py` / `tool_make_tv_shot.py`, plus the CI helpers
-  `tool_compare_eval.py` / `tool_eval_common.py`). The **one exception** is
-  `gen_tracks.py`: it is a build-time code generator (YAML → `track_data.h`)
-  wired into the Makefile by that name, not an analysis tool. Unit tests in
-  `tests/` are named `test_*`.
-
-- **The STATE line has 21 fields and yaw rate sits at field 6, before the four
-  wheel torques** (fl/fr/rl/rr are fields 7-10). It is very easy to miscount and
-  read the yaw-rate column as a wheel torque. The full field order is in the
-  visualiser.py header.
-
-- **The steering driver is a Stanley law plus a physics-derived curvature
-  feedforward**, inline in `HIL_Firmware/src/motion_control.c` (`steer_command`).
-  It replaced an earlier model-based LQR (the deleted `lqr_steer.c`); older
-  comments/docs may still say LQR, Pure Pursuit or Stanley — it is now Stanley.
-  The feedforward `δ = (L·κ + Kus·v²·κ)/ACK_NOMINAL` uses the understeer gradient
-  `Kus` derived from the Pacejka cornering stiffness (no tuning); the feedback is
-  `−e2 + atan2(K_STANLEY·(−e1), v)` on heading error e2 and cross-track e1. The
-  one steering tunable is `g_K_STANLEY`. It keeps NO integrator, so there is no
-  steering state to reset (mean CTE ~0.16 m, a touch looser than the old LQR's
-  ~0.09 m but 0 off-track and ~same lap time). `motion_control_reset()` clears
-  only the progress index and throttle integrator.
-
-- **Per-wheel vertical load is computed in one shared place:**
-  `shared/load_transfer.h`. Both the vehicle model (`vehicle_model.c`) and the
-  ECU grip estimate (`grip_limits()` in `torque_vectoring.c`) call
-  `load_transfer(v, ax, ay, Fz)`, so the static split, aero downforce and
-  load-transfer formula cannot drift between the two sides. Each side still
-  computes its OWN `ax`/`ay` (the ECU estimates them from sensors, the model
-  knows them exactly), which is the intended HIL difference; only the load
-  FORMULA is unified. Do not re-inline this calculation.
-
-- **Torque vectoring acts during braking too.** The left/right bias depends only
-  on yaw-rate error, not on the sign of the driver torque, so it is applied to
-  regen on corner entry as well as to drive on power. There are no friction
-  brakes; the car brakes with motor regen only.
-
-- **The lap-time lever is corner speed, set by `g_GRIP_USE`** (the fraction of
-  the physically-derived peak grip the car drives at), bounded by the racing line.
-  The grip budget feeds the speed planner, the friction-circle braking budget and
-  the throttle traction cut through the single `peak_lat(v)` model, so there is
-  one grip number, not four. The racing line is shaped for the FULL physical peak
-  (its grip and radius floor are derived, not tuned), so `g_RACING_MARGIN` is the
-  line's only knob. Raising `g_GRIP_USE` toward 1 carries more speed but leaves
-  the Stanley tracker less margin; re-tune with
-  `tools/tool_cmaes_sweep.py` (shared two-track set by default, or `--tracks
-  fsg2024` for one) and always confirm 0 off-track with `make eval` on every
-  track. (The sweep injects the swept tunables via `TUNE_*` env vars on a binary
-  built once — no recompile per candidate.)
-
-- **The TV controller keeps internal PID state** (static integrator and previous
-  error). Call `torque_vectoring_reset()` between independent runs or test cases.
-  Unit tests must reset between cases or one case leaks state into the next.
-
-- **The ECU boundary is build-enforced.** `torque_vectoring.c` compiles with only
-  `-I ECU_Firmware/include -I shared`, so it must not include anything from
-  `HIL_Firmware/`. `shared/` is the only place both sides can share code.
+- Wheel order is FL, FR, RL, RR everywhere. Motor controller nodes are 1 to 4 in that
+  order. The ECU uses node 16.
+- Torque inside the ECU is car motor-shaft Nm. It becomes controller current with
+  `MOTOR_NM_PER_AMP` (29.4 Nm over 20 A), and the left motors get the opposite sign.
+- The control step runs every 10 ms from `app_tick()`. In HIL the simulator sends
+  `CONTROL` last each tick, and `hil.c` only takes inputs as a full set when it arrives.
+- Torque needs `ECU_DRIVE` and no inhibit bits. Soft inhibits (pedal disagreement,
+  brake with throttle) zero torque while active. Every other inhibit drops to standby.
+- Arming needs a fresh request: brake held for 1 s with the throttle released, or an
+  off to on edge of the simulator's drive flag.
+- `HIL_ALLOWED` in `config.h` must be 0 on the car.
+- `sim/sim.c` only moves time in `sim_run_ms()`, so host tests are exact and repeatable.
+  The fake IMU is a register map, so the real `imu.c` driver runs in the tests.
+- The STM32 drivers could not be tried on the board from here. Anything that touches
+  registers needs a bench check after changes.

@@ -1,32 +1,24 @@
 # Build output
 build/
+build-sim/
 *.o
 *.exe
-*.out
-*.a
-*.so
-*.dll
+*.elf
+*.hex
+*.bin
+*.map
 
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
-.venv/
-venv/
-env/
-tempCodeRunnerFile.py
 
 # Editor / IDE
 .vscode/
 .claude
 .idea/
 *.swp
-*.swo
 *~
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Local lap-evaluation metric history (see `make eval-log`)
-tests/eval_history.csv

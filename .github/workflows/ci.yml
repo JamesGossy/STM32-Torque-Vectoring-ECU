@@ -1,131 +1,79 @@
+# Builds the STM32 firmware, runs the host tests on Linux and Windows, runs the real
+# motor controller firmware against the ECU, and drives the Formula Student
+# simulator's lap matrix with this firmware in the loop.
 name: CI
 
 on:
   push:
     branches: ["**"]
   pull_request:
-    branches: ["**"]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
+  firmware:
+    name: STM32G474 firmware
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Need history so we can check out the base branch and evaluate it for
-          # the commit-to-commit delta below.
-          fetch-depth: 0
-
-      - name: Install dependencies
-        run: sudo apt-get install -y gcc make
-
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi ninja-build clang-format
+      - name: Format check
+        run: make format-check
       - name: Build
-        run: make
+        run: make firmware
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tv_ecu-firmware
+          path: |
+            ECU_Firmware/build/tv_ecu.elf
+            ECU_Firmware/build/tv_ecu.hex
+            ECU_Firmware/build/tv_ecu.bin
+            ECU_Firmware/build/tv_ecu.map
 
-      - name: Run unit tests
-        run: make test
-
-      - name: Base-branch lap evaluation (for delta)
-        id: base_eval
-        # Evaluate the merge target so the next step can show how this change
-        # moves the metrics. Best-effort: if the base can't be built/checked out
-        # (e.g. a brand-new branch with no common base), we skip the delta and
-        # the main step renders current-only. Never fails the job.
-        continue-on-error: true
+  host-tests:
+    name: Host tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    defaults:
+      run:
+        working-directory: ECU_Firmware
+    steps:
+      - uses: actions/checkout@v4
+      - uses: seanmiddleditch/gha-setup-ninja@v5
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Build and test
         run: |
-          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
-          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
-            echo "No usable base ref; skipping delta."
-            exit 0
-          fi
-          echo "Base ref: $BASE_REF"
-          git worktree add /tmp/base "$BASE_REF" || { echo "checkout failed"; exit 0; }
-          ( cd /tmp/base && make eval > /tmp/base_eval.txt 2>&1 ) || { echo "base eval failed"; exit 0; }
-          grep '^RESULT' /tmp/base_eval.txt > base_result.txt || echo "no RESULT in base"
-          cat base_result.txt || true
+          cmake --preset sim
+          cmake --build build-sim
+          ctest --preset sim
 
-      - name: Lap evaluation
-        id: eval
+  motor-interop:
+    name: Real motor controller firmware against the ECU
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the motor controller firmware
+        run: git clone --depth 1 --branch foc-firmware https://github.com/JamesGossy/stm32_motor_controller.git ../mc
+      - name: Build and run
         run: |
-          # Run the headless lap evaluator and capture its full output.
-          make eval | tee eval_output.txt
+          sudo apt-get update && sudo apt-get install -y ninja-build
+          make test MC_DIR=../mc/controller_firmware
 
-          # Pull out the machine-readable RESULT line and split it into fields
-          # (mean_cte=.. worst_cte=.. ... lap_s=..) as EVAL_<name> variables.
-          RESULT=$(grep '^RESULT' eval_output.txt)
-          for kv in ${RESULT#RESULT }; do
-            export "EVAL_${kv%%=*}=${kv#*=}"
-          done
-
-          # Render a summary table (with a Δ-vs-base column when the base eval
-          # ran) onto the GitHub Actions run page. tool_compare_eval.py owns the table
-          # formatting and the soft regression gate, so CI and local runs agree.
-          grep '^RESULT' eval_output.txt > current_result.txt
-          BASE_ARG=""
-          if [ -s base_result.txt ]; then BASE_ARG="--base base_result.txt"; fi
-
-          {
-            echo "## 🏎️ Lap evaluation"
-            echo ""
-            echo "Headless run of the motion-control → ECU → vehicle loop over the FSG 2024 track (50 s cap)."
-            if [ -n "$BASE_ARG" ]; then
-              echo "Δ column is the change versus the merge base."
-            fi
-            echo ""
-            python3 tools/tool_compare_eval.py --current current_result.txt $BASE_ARG
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          # Soft regression gate: lap-time regression beyond tolerance or an
-          # increase in off-track ticks vs base. Advisory only — emitted as a
-          # warning, does not fail the job (the hard gates below do that).
-          if [ -n "$BASE_ARG" ]; then
-            python3 tools/tool_compare_eval.py --gate --current current_result.txt $BASE_ARG >/dev/null \
-              || echo "::warning::Lap metrics regressed vs base (see the delta table in the run summary)"
-          fi
-
-          # Regression guard: fail the job if the car never completed a lap, or
-          # went off-track. The LQR tracker on the feasibility-aware racing line
-          # runs a fully clean lap (0 off-track), so off-track is now a hard gate
-          # at 0 — any cone contact is a real regression, not a tolerated graze.
-          OFFTRACK_LIMIT=0
-          FAIL=0
-          if [ "${EVAL_laps}" = "0" ]; then
-            echo "::error::Car did not complete a lap within 50 s"
-            FAIL=1
-          fi
-          if [ "${EVAL_offtrack}" -gt "$OFFTRACK_LIMIT" ]; then
-            echo "::error::Car went off-track (${EVAL_offtrack} ticks; clean lap is 0)"
-            FAIL=1
-          fi
-          if [ "${EVAL_sharp_viol}" != "0" ]; then
-            echo "::warning::${EVAL_sharp_viol} sharp-corner ticks exceeded 2 m cross-track error"
-          fi
-          exit $FAIL
-
-      - name: Sim performance benchmark
-        # Informational only — this is raw compute throughput and depends on the
-        # GitHub runner hardware, so it is NOT a pass/fail gate (it never fails
-        # the job) and the numbers will differ from a local run.
+  hil-laps:
+    name: Simulator lap matrix through the ECU firmware
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the simulator
+        run: git clone --depth 1 https://github.com/JamesGossy/Formula-Student-Autonomous-Sim.git ../sim
+      - name: Build ecu_sim
         run: |
-          # 3 s budget averages out CPU-frequency / scheduling jitter.
-          make perf >/dev/null 2>&1   # build (output discarded)
-          PERF_OUT=$(HIL_Firmware/build/perf_sim 3)
-          echo "$PERF_OUT"
-
-          PERF=$(echo "$PERF_OUT" | grep '^PERF')
-          for kv in ${PERF#PERF }; do
-            export "PERF_${kv%%=*}=${kv#*=}"
-          done
-
-          {
-            echo "## ⚡ Sim performance (GitHub runner hardware)"
-            echo ""
-            echo "Raw compute throughput of the tick loop with no real-time sleep, over a 3 s wall-clock budget. Hardware-dependent — informational, not a gate."
-            echo ""
-            echo "| Metric | Value |"
-            echo "| --- | --- |"
-            echo "| Ticks per second | ${PERF_ticks_per_s} |"
-            echo "| Real-time factor | ${PERF_rt_factor}× |"
-            echo "| Laps per wall-second | ${PERF_laps_per_s} |"
-          } >> "$GITHUB_STEP_SUMMARY"
+          sudo apt-get update && sudo apt-get install -y ninja-build
+          make sim
+      - name: Drive both tracks
+        working-directory: ../sim
+        run: ECU_SIM=$GITHUB_WORKSPACE/ECU_Firmware/build-sim/ecu_sim make test-hil PYTHON=python3
