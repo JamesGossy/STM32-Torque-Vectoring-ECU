@@ -1,0 +1,519 @@
+(kicad_symbol_lib (version 20231120) (generator "kicad_symbol_editor")
+(symbol "NCU18XH103F60RB"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			
+			
+			
+			
+			
+			
+			
+			(symbol "NCU18XH103F60RB_0_1"
+				(polyline
+					(pts
+						(xy -1.905 3.175) (xy -1.905 1.905) (xy 1.905 -1.905) (xy 1.905 -3.175)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "NCU18XH103F60RB_1_1"
+				(rectangle
+					(start -1.016 2.54)
+					(end 1.016 -2.54)
+					(stroke
+						(width 0.254)
+						(type solid)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 0 5.08 270)
+					(length 2.54)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -5.08 90)
+					(length 2.54)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		
+(property "Reference" "TH" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Value" "10k NTC" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Footprint" "PCM_JLCPCB:R_0603" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Datasheet" "https://www.murata.com/en-us/products/productdetail?partno=NCU18XH103F60RB" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Description" "10k ohm +/-1%, B25/50=3380K +/-1%; project addition to PCM_JLCPCB" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Manufacturer" "Murata" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Part" "NCU18XH103F60RB" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "LCSC" "C440252" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+)
+
+(symbol "LQW15AN47NG00D"
+		(pin_numbers hide)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+				(symbol "LQW15AN47NG00D_0_1"
+			(arc
+				(start 0 -2.54)
+				(mid 0.6323 -1.905)
+				(end 0 -1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0 -1.27)
+				(mid 0.6323 -0.635)
+				(end 0 0)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0 0)
+				(mid 0.6323 0.635)
+				(end 0 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(arc
+				(start 0 1.27)
+				(mid 0.6323 1.905)
+				(end 0 2.54)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "LQW15AN47NG00D_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	
+(property "Reference" "L" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Value" "47nH" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Footprint" "PCM_JLCPCB:L_0402" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Datasheet" "https://www.murata.com/en-us/products/productdetail?partno=LQW15AN47NG00D" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Description" "47nH +/-2%, 210mA, SRF min 2.9GHz; project addition to PCM_JLCPCB" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Manufacturer" "Murata" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Part" "LQW15AN47NG00D" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "LCSC" "C22334" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+)
+
+
+(symbol "0603_60R4_1pct"
+		(pin_numbers hide)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		(symbol "0603_60R4_1pct_0_1"
+			(rectangle
+				(start -1.016 2.54)
+				(end 1.016 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "0603_60R4_1pct_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	
+(property "Reference" "R" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Value" "60.4Ω" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Footprint" "PCM_JLCPCB:R_0603" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Datasheet" "https://www.lcsc.com/product-detail/C23090.html" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Description" "60.4 ohm 1% 100mW 75V; project PCM extension" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Manufacturer" "UNI-ROYAL" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Part" "0603WAF604JT5E" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "LCSC" "C23090" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+)
+
+(symbol "0603_64k9_1pct"
+		(pin_numbers hide)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		(symbol "0603_64k9_1pct_0_1"
+			(rectangle
+				(start -1.016 2.54)
+				(end 1.016 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "0603_64k9_1pct_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	
+(property "Reference" "R" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Value" "64.9kΩ" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Footprint" "PCM_JLCPCB:R_0603" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Datasheet" "https://www.lcsc.com/product-detail/C14891.html" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Description" "64.9k ohm 1% 100mW; project PCM extension" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Manufacturer" "UNI-ROYAL" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Part" "0603WAF6492T5E" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "LCSC" "C14891" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+)
+
+(symbol "MF_NSMF020_2"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		
+		
+		
+		
+		
+		
+		
+		(symbol "MF_NSMF020_2_0_1"
+			(polyline
+				(pts
+					(xy -1.524 2.54) (xy -1.524 1.524) (xy 1.524 -1.524) (xy 1.524 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -0.762 2.54)
+				(end 0.762 -2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 2.54) (xy 0 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "MF_NSMF020_2_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	
+(property "Reference" "F" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Value" "200mA PTC" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Footprint" "PCM_JLCPCB:R_1206" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Datasheet" "https://www.bourns.com/docs/product-datasheets/mf-nsmf.pdf" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Description" "200mA hold, 460mA trip, 24V PPTC; project PCM extension" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Manufacturer" "Bourns" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+(property "Part" "MF-NSMF020-2" (at 0 0 0) (effects (font (size 1.016 1.016)) (hide yes)))
+)
+
+)

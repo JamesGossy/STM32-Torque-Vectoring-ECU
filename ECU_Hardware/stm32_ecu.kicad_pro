@@ -648,7 +648,7 @@
         "uuid": "b5b956de-2b1a-4b4f-a2a5-db51f50a7e3a"
       }
     ],
-    "used_designators": "U1",
+    "used_designators": "R11-12,#PWR16,#PWR49,#PWR147-149,C16-18",
     "variants": []
   },
   "sheets": [
@@ -683,6 +683,10 @@
     [
       "6e473184-b509-4792-9e10-07403758cd99",
       "Ambient Temperature"
+    ],
+    [
+      "19ade1e6-a140-4e0a-b88c-52766c988105",
+      "Driver Inputs"
     ]
   ],
   "text_variables": {},

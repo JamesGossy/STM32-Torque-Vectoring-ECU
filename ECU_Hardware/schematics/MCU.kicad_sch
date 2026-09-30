@@ -5,6 +5,751 @@
 	(uuid "cd96e49b-d5cf-4977-a5e7-becf899cab8a")
 	(paper "A3")
 	(lib_symbols
+		(symbol "ECU_Reviewed:Tactile Button, 160gf, 12V, 50mA, 4.0mm"
+			(pin_names
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "S"
+				(at 0 1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Tactile Button, 160gf"
+				(at 0 -8.89 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 0.8 0.8)
+					)
+				)
+			)
+			(property "Footprint" "PCM_JLCPCB:SW_TS-1088-AR02016"
+				(at 0 -10.16 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(italic yes)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_XUNPU-TS-1088-AR02016_C720477.pdf"
+				(at -2.286 0.127 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Description" "Without 50mA 4mm 100MΩ 100000 Times 12V 160gf 3mm 2mm Round Button Standing paste SPST SMD Tactile Switches ROHS"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "LCSC" "C720477"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Stock" "346801"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Price" "0.044USD"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Process" "SMT"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Minimum Qty" "5"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Attrition Qty" "4"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Class" "Basic Component"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Category" "Switches,Tactile Switches"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Manufacturer" "XUNPU"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Part" "TS-1088-AR02016"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Switch Length" "4mm"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Voltage Rating (Dc)" "12V"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "With Lamp" "No"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Operating Force" "160gf@±50gf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Actuator/Cap Color" "Black"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Mechanical Life" "100000 Times"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Strike Gundam" "NO"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Circuit" "SPST"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Switch Height" "2mm"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Actuator Style" "Round Button"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Switch Width" "3mm"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Contact Current" "50mA"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Operating Temperature" "-30°C~+80°C"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Mounting Style" "Brick nogging"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Insulation Resistance" "100MΩ"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Pin Style" "SMDSplicing"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "C720477"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Tactile Button, 160gf, 12V, 50mA, 4.0mm_0_1"
+				(polyline
+					(pts
+						(xy -2.54 2.54) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 -5.08) (xy 0 -5.08)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.508 0.762) (xy -1.27 -2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 0.762) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 0.508)
+					(radius 0.3175)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(circle
+					(center 0 -2.794)
+					(radius 0.3175)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -3.302) (xy 0 -5.08)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 2.54 0)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -5.08 0)
+					(length 2.54)
+					(name "B"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1 1)
+							)
+						)
+					)
+				)
+			)
+			(symbol "Tactile Button, 160gf, 12V, 50mA, 4.0mm_1_1"
+				(rectangle
+					(start -2.54 5.08)
+					(end 2.54 -7.62)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "ECU_Reviewed:XC7EL89COO-114YLC-16M"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "X"
+				(at 0 7.62 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "XC7EL89COO-114YLC-16M"
+				(at 0 -7.62 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "easyeda2kicad:CRYSTAL-SMD_4P-L2.0-W1.6-BL"
+				(at 0 -10.16 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C7429730.pdf"
+				(at 0 -12.7 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Manufacturer" "YXC(扬兴晶振)"
+				(at 0 -15.24 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "MPN" "XC7EL89COO-114YLC-16M"
+				(at 0 -17.78 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "LCSC Part" "C7429730"
+				(at 0 -20.32 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "XC7EL89COO-114YLC-16M_0_1"
+				(rectangle
+					(start -5.08 5.08)
+					(end 5.08 -5.08)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy -5.08 -2.54) (xy -2.54 -2.54) (xy -2.54 0) (xy -1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center -3.81 -3.81)
+					(radius 0.38)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 -1.78) (xy -1.27 1.78)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -0.51 1.78)
+					(end 0.51 -1.78)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -1.78) (xy 1.27 1.78)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 5.08 2.54) (xy 2.54 2.54) (xy 2.54 0) (xy 1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin input line
+					(at -7.62 -2.54 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 7.62 -2.54 180)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 7.62 2.54 180)
+					(length 2.54)
+					(name "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 2.54 0)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "MCU_ST_STM32G4:STM32G474CEUx"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -2689,502 +3434,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "PCM_JLCPCB-Connectors_Buttons:Tactile Button, 160gf, 12V, 50mA, 4.0mm"
-			(pin_names
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "S"
-				(at 0 1.27 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "Tactile Button, 160gf"
-				(at 0 -8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 0.8 0.8)
-					)
-				)
-			)
-			(property "Footprint" "PCM_JLCPCB:SW_TS-1088-AR02016"
-				(at 0 -10.16 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-						(italic yes)
-					)
-				)
-			)
-			(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_XUNPU-TS-1088-AR02016_C720477.pdf"
-				(at -2.286 0.127 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Description" "Without 50mA 4mm 100MΩ 100000 Times 12V 160gf 3mm 2mm Round Button Standing paste SPST SMD Tactile Switches ROHS"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "LCSC" "C720477"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Stock" "346801"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Price" "0.044USD"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Process" "SMT"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Minimum Qty" "5"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Attrition Qty" "4"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Class" "Basic Component"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Category" "Switches,Tactile Switches"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Manufacturer" "XUNPU"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Part" "TS-1088-AR02016"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Switch Length" "4mm"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Voltage Rating (Dc)" "12V"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "With Lamp" "No"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Operating Force" "160gf@±50gf"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Actuator/Cap Color" "Black"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Mechanical Life" "100000 Times"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Strike Gundam" "NO"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Circuit" "SPST"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Switch Height" "2mm"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Actuator Style" "Round Button"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Switch Width" "3mm"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Contact Current" "50mA"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Operating Temperature" "-30°C~+80°C"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Mounting Style" "Brick nogging"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Insulation Resistance" "100MΩ"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Pin Style" "SMDSplicing"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "C720477"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "Tactile Button, 160gf, 12V, 50mA, 4.0mm_0_1"
-				(polyline
-					(pts
-						(xy -2.54 2.54) (xy 0 2.54)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.54 -5.08) (xy 0 -5.08)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 0.762) (xy -1.27 -2.54)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0.762) (xy 0 2.54)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0 0.508)
-					(radius 0.3175)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(circle
-					(center 0 -2.794)
-					(radius 0.3175)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -3.302) (xy 0 -5.08)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin unspecified line
-					(at -5.08 2.54 0)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-				(pin unspecified line
-					(at -5.08 -5.08 0)
-					(length 2.54)
-					(name "B"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1 1)
-							)
-						)
-					)
-				)
-			)
-			(symbol "Tactile Button, 160gf, 12V, 50mA, 4.0mm_1_1"
-				(rectangle
-					(start -2.54 5.08)
-					(end 2.54 -7.62)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "PCM_JLCPCB-Diodes:LED,0805,White"
 			(pin_numbers
 				(hide yes)
@@ -4735,255 +4984,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "easyeda2kicad:XC7EL89COO-114YLC-16M"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "X"
-				(at 0 7.62 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "XC7EL89COO-114YLC-16M"
-				(at 0 -7.62 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" "easyeda2kicad:CRYSTAL-SMD_4P-L2.0-W1.6-BL"
-				(at 0 -10.16 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" "https://www.lcsc.com/datasheet/C7429730.pdf"
-				(at 0 -12.7 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Manufacturer" "YXC(扬兴晶振)"
-				(at 0 -15.24 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "MPN" "XC7EL89COO-114YLC-16M"
-				(at 0 -17.78 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "LCSC Part" "C7429730"
-				(at 0 -20.32 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "XC7EL89COO-114YLC-16M_0_1"
-				(rectangle
-					(start -5.08 5.08)
-					(end 5.08 -5.08)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(polyline
-					(pts
-						(xy -5.08 -2.54) (xy -2.54 -2.54) (xy -2.54 0) (xy -1.27 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center -3.81 -3.81)
-					(radius 0.38)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 -1.78) (xy -1.27 1.78)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start -0.51 1.78)
-					(end 0.51 -1.78)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -1.78) (xy 1.27 1.78)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 5.08 2.54) (xy 2.54 2.54) (xy 2.54 0) (xy 1.27 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin input line
-					(at -7.62 -2.54 0)
-					(length 2.54)
-					(name "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at 7.62 -2.54 180)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at 7.62 2.54 180)
-					(length 2.54)
-					(name "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -7.62 2.54 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "power:+3.3V"
 			(power global)
 			(pin_numbers
@@ -5553,39 +5553,6 @@
 		)
 		(uuid "f6293da6-2f72-499b-8ea8-bae481273384")
 	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 232.41 204.47 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "0a0fd2f3-28dc-47ed-88fc-b8c3390edfeb")
-	)
-	(text "RESERVED INTERFACES - MCU GPIO/ADC/AF allocation TBD.\nThese ports are not yet wired to MCU pins. Heartbeat LED is local."
-		(exclude_from_sim no)
-		(at 110.49 172.72 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left top)
-		)
-		(uuid "0b08beae-fa40-4dc8-bf82-f49a354ddd07")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 232.41 199.39 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "0ce9b397-5b48-4409-86f3-947711da9fab")
-	)
 	(text "Heartbeat LED"
 		(exclude_from_sim no)
 		(at 34.036 108.712 0)
@@ -5595,94 +5562,6 @@
 			)
 		)
 		(uuid "0fccd90e-bab6-4f4d-99db-af19f29d5004")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 224.79 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "0ff3601e-3ade-4319-aeb5-df9a7b87c09a")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 232.41 219.71 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "158a8801-5fbb-4e94-9c15-9eee165b2b9d")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 219.71 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "1e198092-c2bb-4cd0-ab49-3bcf962fc390")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 232.41 209.55 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "2e02ed17-c16f-4394-ba70-77011a4290da")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 234.95 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "2e59ee62-e03a-4f07-acfd-e06a25ad15f1")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 209.55 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "4b9422b9-64ef-4f33-8df0-6d487cd34cf3")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 194.31 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "5bb20510-c054-4105-96da-a067cc75da57")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 232.41 194.31 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "5c2f582e-74fe-4d76-86ec-221e61ea581d")
 	)
 	(text "Crystal"
 		(exclude_from_sim no)
@@ -5714,38 +5593,16 @@
 		)
 		(uuid "6f9dfa56-c3c2-4dd9-b56b-e2207b35e6a1")
 	)
-	(text "TBD"
+	(text "ADC1: PA0 temp; PA1 APPS1; PA2 APPS2; PA3 brake; PB0 steering; PB1 VIN.\nConfigure analog / no pulls; long acquisition time; reject implausible or stale inputs.\nVIN = ADC voltage x23. Require main input present before issuing torque commands.\nUSART1 AF7: PA9 TX / PA10 RX; PPS PA8 TIM1_CH1 AF6.\nSPI1 AF5: PA5/6/7; PA4 CS; PC4 EXTI4. FDCAN2 AF9: PB5 RX / PB6 TX.\nReceiving motor controllers must time out stale torque commands; enable MCU watchdog."
 		(exclude_from_sim no)
-		(at 232.41 214.63 0)
+		(at 110.49 177.8 0)
 		(effects
 			(font
-				(size 1.016 1.016)
+				(size 1.27 1.27)
 			)
 			(justify left top)
 		)
-		(uuid "8ee5c51d-a24e-424e-b689-5ee7d833f34b")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 229.87 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "9a1da4d7-c93d-47fe-bb0f-eb36afc9c122")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 214.63 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "ca267efe-68f7-4394-bba4-193644d3b194")
+		(uuid "7d43d6c5-b571-4cef-a46a-31d572a07c34")
 	)
 	(text "STM32G474"
 		(exclude_from_sim no)
@@ -5756,28 +5613,6 @@
 			)
 		)
 		(uuid "e5f49c24-427e-446b-a970-962835ed4490")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 204.47 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "e6d11cc2-ce0c-4490-8363-67811b4e8e47")
-	)
-	(text "TBD"
-		(exclude_from_sim no)
-		(at 146.05 199.39 0)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify left top)
-		)
-		(uuid "eccb6ac9-83c5-488e-9e9d-cefee02460f8")
 	)
 	(junction
 		(at 181.61 49.53)
@@ -5960,20 +5795,8 @@
 		(uuid "f4888cf4-8bc8-4f13-8daf-cc140ebf42d7")
 	)
 	(no_connect
-		(at 186.69 83.82)
-		(uuid "0e6feeb1-4e75-4453-bdc5-cf43bcf2be2f")
-	)
-	(no_connect
-		(at 222.25 81.28)
-		(uuid "1d3add31-4727-45a4-9cd8-09ad44d1fc73")
-	)
-	(no_connect
 		(at 186.69 99.06)
 		(uuid "25b4c004-abbc-47ae-b2b0-85fc16e2fe33")
-	)
-	(no_connect
-		(at 222.25 86.36)
-		(uuid "26a2eef7-8fd9-4ae4-b95d-5e55cc658c30")
 	)
 	(no_connect
 		(at 186.69 96.52)
@@ -5984,40 +5807,16 @@
 		(uuid "2fd50b69-c52c-43cf-ad79-e4fc799bec28")
 	)
 	(no_connect
-		(at 222.25 73.66)
-		(uuid "3805758f-f263-44e2-b928-4d019e5c6d53")
-	)
-	(no_connect
 		(at 186.69 142.24)
 		(uuid "49de7e6a-780d-4baf-bfee-3af43f07d868")
-	)
-	(no_connect
-		(at 222.25 91.44)
-		(uuid "562055cc-3761-4729-9d24-865425598b11")
 	)
 	(no_connect
 		(at 186.69 88.9)
 		(uuid "5dea6da9-f991-4824-b0f8-49975ea08f5e")
 	)
 	(no_connect
-		(at 222.25 88.9)
-		(uuid "6705d187-bde4-4352-9e87-a6152ecc6e21")
-	)
-	(no_connect
-		(at 222.25 76.2)
-		(uuid "6a441153-6053-4a1f-a3ae-6d6598278d83")
-	)
-	(no_connect
-		(at 222.25 66.04)
-		(uuid "6ac2a68a-a04c-4e1e-b1b3-16699456cb60")
-	)
-	(no_connect
 		(at 186.69 91.44)
 		(uuid "6ed551f1-5350-4817-a69f-214f94978603")
-	)
-	(no_connect
-		(at 222.25 78.74)
-		(uuid "785ed8f5-41bc-4357-9028-d5d8560840d2")
 	)
 	(no_connect
 		(at 186.69 129.54)
@@ -6028,28 +5827,12 @@
 		(uuid "9e1f4095-e6c6-48f7-b276-4b05fdf3fa91")
 	)
 	(no_connect
-		(at 222.25 71.12)
-		(uuid "abeef358-421a-48d7-a4c1-1538e371fb1a")
-	)
-	(no_connect
 		(at 186.69 86.36)
 		(uuid "bd688afc-4e1e-41e1-ace5-8d67f3eab707")
 	)
 	(no_connect
-		(at 222.25 83.82)
-		(uuid "c6cb95c2-db4c-4b64-a9eb-a41bcf2601aa")
-	)
-	(no_connect
-		(at 186.69 106.68)
-		(uuid "cb1a305b-0a44-4c4b-b01a-b5c7a09c8935")
-	)
-	(no_connect
 		(at 186.69 132.08)
 		(uuid "cde36cd5-d070-4f26-84c0-9c16c754bc33")
-	)
-	(no_connect
-		(at 222.25 68.58)
-		(uuid "d6a3e6ba-0c47-4dd7-817e-348d3cba9722")
 	)
 	(no_connect
 		(at 186.69 134.62)
@@ -6068,12 +5851,18 @@
 		(uuid "f2d8df73-6e7b-40c1-b084-fd3479a88412")
 	)
 	(no_connect
-		(at 186.69 104.14)
-		(uuid "fac91e15-1da6-4084-8cae-d17c82215eba")
-	)
-	(no_connect
 		(at 186.69 139.7)
 		(uuid "fb236980-9d5d-4129-bca7-2d7bb7383c48")
+	)
+	(wire
+		(pts
+			(xy 222.25 83.82) (xy 260.35 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "00836491-786b-4cbe-84f7-a6616300ed11")
 	)
 	(wire
 		(pts
@@ -6097,16 +5886,6 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 210.82) (xy 231.14 210.82)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "03c04249-a454-40d4-a338-0281430c5329")
-	)
-	(wire
-		(pts
 			(xy 163.83 38.1) (xy 163.83 39.37)
 		)
 		(stroke
@@ -6124,6 +5903,16 @@
 			(type default)
 		)
 		(uuid "0584a88c-dbb7-4577-a9c3-27e17465960a")
+	)
+	(wire
+		(pts
+			(xy 222.25 81.28) (xy 260.35 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "08a041e4-71ff-4582-a39b-2d86454499e1")
 	)
 	(wire
 		(pts
@@ -6177,16 +5966,6 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 200.66) (xy 231.14 200.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "117a488a-70cd-4bb2-9dac-07722e26c268")
-	)
-	(wire
-		(pts
 			(xy 86.36 88.9) (xy 91.44 88.9)
 		)
 		(stroke
@@ -6194,16 +5973,6 @@
 			(type default)
 		)
 		(uuid "11d5396e-22c3-419e-8819-ce0fdef30289")
-	)
-	(wire
-		(pts
-			(xy 114.3 236.22) (xy 144.78 236.22)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "132f5b2b-83b3-47a2-9a83-2e1012a2b8a2")
 	)
 	(wire
 		(pts
@@ -6227,6 +5996,16 @@
 	)
 	(wire
 		(pts
+			(xy 222.25 71.12) (xy 260.35 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "16dd1a6b-dc45-4923-bd4b-4102c06da27b")
+	)
+	(wire
+		(pts
 			(xy 38.1 53.34) (xy 44.45 53.34)
 		)
 		(stroke
@@ -6237,23 +6016,23 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 200.66) (xy 144.78 200.66)
+			(xy 222.25 68.58) (xy 260.35 68.58)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "19cbd0ae-0b80-45f7-8b2a-a86b77a5021a")
+		(uuid "17f873f7-4424-44af-9ce3-10a7096fd166")
 	)
 	(wire
 		(pts
-			(xy 114.3 231.14) (xy 144.78 231.14)
+			(xy 222.25 86.36) (xy 260.35 86.36)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "1da5b35e-02e1-47c7-aebd-57d8c41da390")
+		(uuid "1aa81177-a804-47cf-9db0-667a0ca59f0f")
 	)
 	(wire
 		(pts
@@ -6287,16 +6066,6 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 215.9) (xy 144.78 215.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "25cc88c9-658f-411a-b5bf-081b1b7265ca")
-	)
-	(wire
-		(pts
 			(xy 154.94 46.99) (xy 154.94 49.53)
 		)
 		(stroke
@@ -6304,36 +6073,6 @@
 			(type default)
 		)
 		(uuid "25f50f42-8d51-47cb-9652-406c4dcfb441")
-	)
-	(wire
-		(pts
-			(xy 200.66 205.74) (xy 231.14 205.74)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2786d177-055d-4356-89db-6a47d6127042")
-	)
-	(wire
-		(pts
-			(xy 114.3 205.74) (xy 144.78 205.74)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2811e3f8-b599-463e-a359-7764d36c7785")
-	)
-	(wire
-		(pts
-			(xy 114.3 195.58) (xy 144.78 195.58)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "298ad2aa-706e-4ad8-acea-9bf0e081d64b")
 	)
 	(wire
 		(pts
@@ -6427,16 +6166,6 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 220.98) (xy 231.14 220.98)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "39ce4e34-90e5-4ea1-9007-f3645012a2f4")
-	)
-	(wire
-		(pts
 			(xy 91.44 99.06) (xy 91.44 97.79)
 		)
 		(stroke
@@ -6487,6 +6216,16 @@
 	)
 	(wire
 		(pts
+			(xy 186.69 106.68) (xy 161.29 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "40200eb6-f086-4c85-802c-1a82954d10fe")
+	)
+	(wire
+		(pts
 			(xy 190.5 38.1) (xy 199.39 38.1)
 		)
 		(stroke
@@ -6514,6 +6253,16 @@
 			(type default)
 		)
 		(uuid "46650de3-a4e0-4e5d-b82a-67752a05fe5c")
+	)
+	(wire
+		(pts
+			(xy 222.25 76.2) (xy 260.35 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "46b32555-093b-41ab-8646-1c044148ea33")
 	)
 	(wire
 		(pts
@@ -6574,6 +6323,16 @@
 			(type default)
 		)
 		(uuid "54e3acc7-0922-4f61-82a3-554c868222d6")
+	)
+	(wire
+		(pts
+			(xy 186.69 104.14) (xy 161.29 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "56473c96-0ff0-4d5b-b9ac-787e6d758036")
 	)
 	(wire
 		(pts
@@ -6687,16 +6446,6 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 226.06) (xy 144.78 226.06)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "699281c4-10e4-411e-9d9b-966076f3d0a2")
-	)
-	(wire
-		(pts
 			(xy 209.55 38.1) (xy 215.9 38.1)
 		)
 		(stroke
@@ -6747,16 +6496,6 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 210.82) (xy 144.78 210.82)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7d8daaea-c899-46b7-b1bd-a72789612005")
-	)
-	(wire
-		(pts
 			(xy 224.79 49.53) (xy 224.79 46.99)
 		)
 		(stroke
@@ -6794,6 +6533,16 @@
 			(type default)
 		)
 		(uuid "8a843396-fe47-4807-82ef-10e1a82dcb9b")
+	)
+	(wire
+		(pts
+			(xy 222.25 91.44) (xy 260.35 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8d985e6e-5adc-499b-844b-d85259a85e66")
 	)
 	(wire
 		(pts
@@ -6867,6 +6616,16 @@
 	)
 	(wire
 		(pts
+			(xy 222.25 73.66) (xy 260.35 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9e2e4ddb-944e-4d9c-accf-57dd6fb1c50e")
+	)
+	(wire
+		(pts
 			(xy 40.64 85.09) (xy 45.72 85.09)
 		)
 		(stroke
@@ -6877,26 +6636,6 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 215.9) (xy 231.14 215.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9fd501ce-ddeb-4cce-9201-5776f43e3cb7")
-	)
-	(wire
-		(pts
-			(xy 45.72 182.88) (xy 76.2 182.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a1086236-be3a-410e-bb50-e2aa17e37f02")
-	)
-	(wire
-		(pts
 			(xy 45.72 85.09) (xy 57.15 85.09)
 		)
 		(stroke
@@ -6904,16 +6643,6 @@
 			(type default)
 		)
 		(uuid "a12b7e3f-135d-477a-a811-d7b8f5c3a498")
-	)
-	(wire
-		(pts
-			(xy 114.3 220.98) (xy 144.78 220.98)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a609833c-7f89-4ba2-a6e9-b00268ac7a5f")
 	)
 	(wire
 		(pts
@@ -6987,6 +6716,26 @@
 	)
 	(wire
 		(pts
+			(xy 222.25 66.04) (xy 260.35 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b2df41b2-7778-4b26-8590-debb8d90c935")
+	)
+	(wire
+		(pts
+			(xy 186.69 83.82) (xy 163.83 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b355a712-05b3-41f2-9efb-87d20f7ce4b4")
+	)
+	(wire
+		(pts
 			(xy 44.45 44.45) (xy 44.45 43.18)
 		)
 		(stroke
@@ -7034,16 +6783,6 @@
 			(type default)
 		)
 		(uuid "c541bc61-7eab-48c0-b662-64972da7b081")
-	)
-	(wire
-		(pts
-			(xy 45.72 177.8) (xy 76.2 177.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c56d467f-a1b6-4a53-8a45-326d3160ef40")
 	)
 	(wire
 		(pts
@@ -7114,6 +6853,16 @@
 			(type default)
 		)
 		(uuid "d0a91975-d195-4064-a545-2dfc33710b74")
+	)
+	(wire
+		(pts
+			(xy 222.25 88.9) (xy 260.35 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d13afee9-379a-4bfc-9bd8-ac824bb32c56")
 	)
 	(wire
 		(pts
@@ -7207,16 +6956,6 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 195.58) (xy 231.14 195.58)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e95d0a6e-ee97-4710-b210-b79dcce9bb2b")
-	)
-	(wire
-		(pts
 			(xy 44.45 53.34) (xy 66.04 53.34)
 		)
 		(stroke
@@ -7287,6 +7026,16 @@
 	)
 	(wire
 		(pts
+			(xy 222.25 78.74) (xy 260.35 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f7004d93-6f17-4056-bbd0-bab0d883728d")
+	)
+	(wire
+		(pts
 			(xy 154.94 49.53) (xy 163.83 49.53)
 		)
 		(stroke
@@ -7304,16 +7053,6 @@
 			(type default)
 		)
 		(uuid "fc8679e3-f7cc-41fb-a510-e8941d0a0da0")
-	)
-	(label "+3V3"
-		(at 76.2 177.8 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right bottom)
-		)
-		(uuid "091b05c5-09ce-46a9-9661-5d7aafb6e789")
 	)
 	(label "HSE_IN"
 		(at 163.83 76.2 0)
@@ -7375,16 +7114,6 @@
 		)
 		(uuid "6adfa83c-55e7-4708-be33-c6bd320e78f2")
 	)
-	(label "GND"
-		(at 76.2 182.88 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right bottom)
-		)
-		(uuid "7bbc62b8-af8a-4697-b3af-0858b4cf8737")
-	)
 	(label "HSE_OUT"
 		(at 163.83 78.74 0)
 		(effects
@@ -7415,38 +7144,82 @@
 		)
 		(uuid "ee28c618-e339-4b13-ab00-b5cd6273d857")
 	)
-	(hierarchical_label "GPS_RX"
-		(shape input)
-		(at 114.3 226.06 180)
+	(hierarchical_label "IMU_CS_N"
+		(shape output)
+		(at 260.35 76.2 0)
 		(effects
 			(font
 				(size 1.016 1.016)
 			)
-			(justify right)
+			(justify left)
 		)
-		(uuid "04be3cfe-42fa-4433-ba1b-5348f9017eff")
+		(uuid "04a9a956-0a62-436d-bb9e-4f5f32362cd9")
 	)
-	(hierarchical_label "GND"
-		(shape passive)
-		(at 45.72 182.88 180)
+	(hierarchical_label "APPS_2"
+		(shape input)
+		(at 260.35 71.12 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left)
+		)
+		(uuid "0d49f8d3-1dd5-4a51-b321-1e45d69746a9")
+	)
+	(hierarchical_label "APPS_1"
+		(shape input)
+		(at 260.35 68.58 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left)
+		)
+		(uuid "110eeb6c-7f37-44aa-a73a-e33a0cdc3098")
+	)
+	(hierarchical_label "IMU_INT"
+		(shape input)
+		(at 163.83 83.82 180)
 		(effects
 			(font
 				(size 1.016 1.016)
 			)
 			(justify right)
 		)
-		(uuid "12908e6c-427d-44a7-8612-0e523889688e")
+		(uuid "11e9b35e-16a3-48ff-a86a-01044e72a8a4")
+	)
+	(hierarchical_label "IMU_MOSI"
+		(shape output)
+		(at 260.35 83.82 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left)
+		)
+		(uuid "14d38428-cfd5-49a8-b041-70a2af7c992e")
 	)
 	(hierarchical_label "VIN_SENSE"
 		(shape input)
-		(at 200.66 210.82 180)
+		(at 161.29 106.68 180)
 		(effects
 			(font
 				(size 1.016 1.016)
 			)
 			(justify right)
 		)
-		(uuid "156913a9-df13-4124-a550-139f50d7c480")
+		(uuid "1b2bbc8a-1801-46f8-bb6a-a554ee776f70")
+	)
+	(hierarchical_label "TEMP_SENSE"
+		(shape input)
+		(at 260.35 66.04 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left)
+		)
+		(uuid "21ec065f-a420-4057-8d4e-953e411ed973")
 	)
 	(hierarchical_label "USB_D+"
 		(shape bidirectional)
@@ -7470,16 +7243,16 @@
 		)
 		(uuid "2362a4bb-30cf-4a9f-a366-90940ed72c8e")
 	)
-	(hierarchical_label "BPPS"
+	(hierarchical_label "IMU_MISO"
 		(shape input)
-		(at 200.66 200.66 180)
+		(at 260.35 81.28 0)
 		(effects
 			(font
 				(size 1.016 1.016)
 			)
-			(justify right)
+			(justify left)
 		)
-		(uuid "2efffb1c-98a3-4fca-8939-4a5cc8bba697")
+		(uuid "2d3f32fb-5fd8-4c7f-82cc-fc3de531ddd1")
 	)
 	(hierarchical_label "SWCLK"
 		(shape input)
@@ -7492,6 +7265,17 @@
 		)
 		(uuid "3eadeaa8-5745-4288-aca1-1dd869200e11")
 	)
+	(hierarchical_label "GPS_TX"
+		(shape output)
+		(at 260.35 88.9 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left)
+		)
+		(uuid "4260cb1b-8c1c-4f12-87f0-80764397738e")
+	)
 	(hierarchical_label "CAN_FAULT"
 		(shape input)
 		(at 172.72 114.3 180)
@@ -7503,82 +7287,27 @@
 		)
 		(uuid "468ebe71-ffe9-4a55-a8fb-54204f90aee0")
 	)
-	(hierarchical_label "APPS_1"
+	(hierarchical_label "GPS_PPS"
 		(shape input)
-		(at 114.3 236.22 180)
+		(at 260.35 86.36 0)
 		(effects
 			(font
 				(size 1.016 1.016)
 			)
-			(justify right)
+			(justify left)
 		)
-		(uuid "4a6b403c-f010-4cbc-9fa2-552f085595f3")
+		(uuid "483a2dd1-602b-4f02-b496-53be21cf298f")
 	)
-	(hierarchical_label "TEMP_SCL"
+	(hierarchical_label "IMU_SCK"
 		(shape output)
-		(at 200.66 215.9 180)
+		(at 260.35 78.74 0)
 		(effects
 			(font
 				(size 1.016 1.016)
 			)
-			(justify right)
+			(justify left)
 		)
-		(uuid "52eb3da7-fd74-4248-9578-821a2f5bfdf1")
-	)
-	(hierarchical_label "IMU_CS_N"
-		(shape output)
-		(at 114.3 210.82 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "5f521256-92f3-49ab-9700-281e7570a5d6")
-	)
-	(hierarchical_label "TEMP_SDA"
-		(shape bidirectional)
-		(at 200.66 220.98 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "753b7c99-92dc-4e5a-a52f-c861741fac63")
-	)
-	(hierarchical_label "GPS_TX"
-		(shape output)
-		(at 114.3 220.98 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "79639247-8dd8-4599-b9d6-a72db7852a9b")
-	)
-	(hierarchical_label "+3V3"
-		(shape input)
-		(at 45.72 177.8 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "8ec56541-e3c6-49e8-9268-3ec26fd11452")
-	)
-	(hierarchical_label "IMU_MISO"
-		(shape input)
-		(at 114.3 205.74 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "924fb012-55d5-4160-942a-9ab433528a3a")
+		(uuid "6fbe4dae-b1d6-4f43-8cdb-0e002d1eed46")
 	)
 	(hierarchical_label "CAN_RX"
 		(shape input)
@@ -7591,6 +7320,28 @@
 		)
 		(uuid "97e3c191-fcc8-43cb-ac9f-4a2321bab08b")
 	)
+	(hierarchical_label "GPS_RX"
+		(shape input)
+		(at 260.35 91.44 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left)
+		)
+		(uuid "af074317-0f23-4dba-ab42-738546636ca5")
+	)
+	(hierarchical_label "BPPS"
+		(shape input)
+		(at 260.35 73.66 0)
+		(effects
+			(font
+				(size 1.016 1.016)
+			)
+			(justify left)
+		)
+		(uuid "b5766ecd-7859-4ebc-8e2d-752a4cb0093f")
+	)
 	(hierarchical_label "SWDIO"
 		(shape bidirectional)
 		(at 251.46 99.06 0)
@@ -7602,28 +7353,6 @@
 		)
 		(uuid "bf3a9860-6600-4fa9-9d14-b2bf307bde3e")
 	)
-	(hierarchical_label "IMU_MOSI"
-		(shape output)
-		(at 114.3 200.66 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "c1649c02-b7af-4182-bc49-9f8da1fe3326")
-	)
-	(hierarchical_label "STEERING"
-		(shape input)
-		(at 200.66 205.74 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "c3244693-b855-4fb3-ad2d-ba30f0827347")
-	)
 	(hierarchical_label "nRST"
 		(shape bidirectional)
 		(at 57.15 85.09 0)
@@ -7634,17 +7363,6 @@
 			(justify left)
 		)
 		(uuid "c84b023b-e334-422c-bb80-1091463f406f")
-	)
-	(hierarchical_label "IMU_INT"
-		(shape input)
-		(at 114.3 215.9 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "d537fc35-4464-4e6f-a3f1-7fda7f046d55")
 	)
 	(hierarchical_label "CAN_TX"
 		(shape output)
@@ -7668,38 +7386,16 @@
 		)
 		(uuid "e2dcc998-fefc-4691-be13-404f5e9788b4")
 	)
-	(hierarchical_label "APPS_2"
+	(hierarchical_label "STEERING"
 		(shape input)
-		(at 200.66 195.58 180)
+		(at 161.29 104.14 180)
 		(effects
 			(font
 				(size 1.016 1.016)
 			)
 			(justify right)
 		)
-		(uuid "e3a903b4-4693-4f21-83af-2de3efef9357")
-	)
-	(hierarchical_label "GPS_PPS"
-		(shape input)
-		(at 114.3 231.14 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "e3f0d215-658a-4e4a-b199-a44afbf641a3")
-	)
-	(hierarchical_label "IMU_SCK"
-		(shape output)
-		(at 114.3 195.58 180)
-		(effects
-			(font
-				(size 1.016 1.016)
-			)
-			(justify right)
-		)
-		(uuid "e71b55ae-5500-451a-b311-b46c04ad0166")
+		(uuid "e32aef21-6644-409e-be93-bdd63c81ea30")
 	)
 	(symbol
 		(lib_id "power:+5V")
@@ -7779,7 +7475,7 @@
 		)
 	)
 	(symbol
-		(lib_id "PCM_JLCPCB-Connectors_Buttons:Tactile Button, 160gf, 12V, 50mA, 4.0mm")
+		(lib_id "ECU_Reviewed:Tactile Button, 160gf, 12V, 50mA, 4.0mm")
 		(at 35.56 90.17 180)
 		(unit 1)
 		(body_style 1)
@@ -8147,7 +7843,7 @@
 		)
 	)
 	(symbol
-		(lib_id "PCM_JLCPCB-Connectors_Buttons:Tactile Button, 160gf, 12V, 50mA, 4.0mm")
+		(lib_id "ECU_Reviewed:Tactile Button, 160gf, 12V, 50mA, 4.0mm")
 		(at 81.28 83.82 0)
 		(mirror y)
 		(unit 1)
@@ -8977,7 +8673,7 @@
 		)
 	)
 	(symbol
-		(lib_id "easyeda2kicad:XC7EL89COO-114YLC-16M")
+		(lib_id "ECU_Reviewed:XC7EL89COO-114YLC-16M")
 		(at 66.04 40.64 0)
 		(unit 1)
 		(body_style 1)
