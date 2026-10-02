@@ -17,7 +17,7 @@ static char line[LINE_MAX];
 static int length, streaming;
 static uint32_t stream_ms;
 
-static const char *STATE_NAMES[]   = { "STARTUP", "STANDBY", "DRIVE" };
+static const char *STATE_NAMES[]   = { "STARTUP", "STANDBY", "DRIVE", "FAULT" };
 static const char *INHIBIT_NAMES[] = { "startup", "motor-offline", "motor-fault", "no-main-power",
     "pedal-sensor", "pedal-disagree", "brake+throttle", "hil-lost", "imu", "can" };
 
@@ -53,12 +53,14 @@ static void print_status(void)
     char inhibits[128];
     inhibit_text(s->inhibit, inhibits, sizeof inhibits);
     say("%s%s v=%.2f steer=%.2f req=%.1f yaw=%.3f/%.3f T=%.1f,%.1f,%.1f,%.1f "
-        "derate=%.0f%%/%.0f%% vin=%.1f ecu=%.1fC inhibit=%s",
+        "derate=%.0f%%/%.0f%% panel=%.0f/%.0f/%.0f%% vin=%.1f ecu=%.1fC inhibit=%s",
         STATE_NAMES[s->state], s->hil ? " HIL" : "", (double)s->speed_ms, (double)s->steering_rad,
         (double)s->request_nm, (double)s->yaw_rate, (double)s->target_yaw_rate,
         (double)s->torque_nm[0], (double)s->torque_nm[1], (double)s->torque_nm[2],
         (double)s->torque_nm[3], (double)(100.0f * s->derate.drive),
-        (double)(100.0f * s->derate.regen), (double)s->vin_v, (double)s->ecu_temp_c, inhibits);
+        (double)(100.0f * s->derate.regen), (double)(100.0f * s->panel.tv),
+        (double)(100.0f * s->panel.power), (double)(100.0f * s->panel.regen), (double)s->vin_v,
+        (double)s->ecu_temp_c, inhibits);
 }
 
 static void print_motors(void)
@@ -99,7 +101,8 @@ static void run(const char *command)
         say("torque off");
     } else if (!strcmp(command, "clear")) {
         motors_clear_faults();
-        say("asked the motor controllers to clear their faults");
+        app_clear_fault();
+        say("cleared the ECU fault and asked the controllers to clear theirs");
     } else if (!strcmp(command, "estop")) {
         app_disarm();
         motors_estop();

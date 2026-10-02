@@ -13,7 +13,7 @@ static float total(const float t[4])
 
 static TvInputs straight(float request, float speed)
 {
-    TvInputs in = { request, speed, 0.0f, 0.0f };
+    TvInputs in = { request, speed, 0.0f, 0.0f, 1.0f };
     return in;
 }
 
@@ -48,6 +48,21 @@ static void over_rotation_moves_torque_left(void)
     torque_vectoring(&in, &FULL, t);
     CHECK(t[WHEEL_FL] > t[WHEEL_FR]);
     CHECK_NEAR(total(t), 40.0f, 1e-4);
+}
+
+static void gain_scales_the_correction(void)
+{
+    float full[4], half[4], off[4];
+    TvInputs in     = straight(40.0f, 10.0f);
+    in.steering_rad = 1.0f;
+    in.yaw_rate     = 1.2f; // small error, so the correction is not at its limit
+    torque_vectoring(&in, &FULL, full);
+    in.gain = 0.5f;
+    torque_vectoring(&in, &FULL, half);
+    in.gain = 0.0f;
+    torque_vectoring(&in, &FULL, off);
+    CHECK_NEAR(half[WHEEL_FR] - 10.0f, 0.5f * (full[WHEEL_FR] - 10.0f), 1e-4);
+    CHECK_NEAR(off[WHEEL_FR], 10.0f, 1e-6);
 }
 
 static void vectoring_works_under_regen(void)
@@ -215,6 +230,7 @@ int main(void)
         T(equal_split_when_going_straight),
         T(left_turn_moves_torque_right),
         T(over_rotation_moves_torque_left),
+        T(gain_scales_the_correction),
         T(vectoring_works_under_regen),
         T(correction_keeps_motors_inside_limits),
         T(no_vectoring_when_stopped),

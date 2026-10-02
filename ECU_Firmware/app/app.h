@@ -5,9 +5,10 @@
 
 #include "derate.h"
 #include "driver_inputs.h"
+#include "panel.h"
 #include <stdint.h>
 
-enum { ECU_STARTUP, ECU_STANDBY, ECU_DRIVE };
+enum { ECU_STARTUP, ECU_STANDBY, ECU_DRIVE, ECU_FAULT };
 
 // Reasons torque is held at zero. SOFT ones return torque as soon as they clear.
 enum {
@@ -28,6 +29,7 @@ typedef struct {
     uint8_t state;    // ECU_*
     int hil;          // 1 while the simulator supplies the inputs
     uint16_t inhibit; // INHIBIT_* bits
+    uint16_t fault;   // what stopped the car, kept until cleared
     uint8_t online;   // bit per motor controller, FL first
     float speed_ms;
     float steering_rad;
@@ -41,6 +43,7 @@ typedef struct {
     float gyro_bias;
     int imu_ok;
     DriverInputs pedals;
+    PanelDials panel;
 } EcuStatus;
 
 void app_init(void);
@@ -49,5 +52,6 @@ void app_tick(void); // every millisecond
 
 const EcuStatus *app_status(void);
 void app_disarm(void);
+void app_clear_fault(void);
 
 #endif

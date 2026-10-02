@@ -9,6 +9,7 @@ typedef struct {
     float speed_ms;
     float steering_rad; // steering angle, positive left
     float yaw_rate;     // measured, rad/s, positive left
+    float gain;         // 0 to 1, scales the yaw correction
 } TvInputs;
 
 typedef struct {

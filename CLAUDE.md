@@ -72,9 +72,11 @@ and at least two laps on both tracks.
 - The control step runs every 10 ms from `app_tick()`. In HIL the simulator sends
   `CONTROL` last each tick, and `hil.c` only takes inputs as a full set when it arrives.
 - Torque needs `ECU_DRIVE` and no inhibit bits. Soft inhibits (pedal disagreement,
-  brake with throttle) zero torque while active. Every other inhibit drops to standby.
+  brake with throttle) zero torque while active. Every other inhibit while driving latches `ECU_FAULT`, cleared by the console `clear` command.
 - Arming needs a fresh request: brake held for 1 s with the throttle released, or an
   off to on edge of the simulator's drive flag.
+- Panel dials (`panel.c`, node 17) scale the yaw correction and the drive and regen limits.
+  Default 100 %, last value held if the panel goes quiet.
 - `HIL_ALLOWED` in `config.h` must be 0 on the car.
 - `sim/sim.c` only moves time in `sim_run_ms()`, so host tests are exact and repeatable.
   The fake IMU is a register map, so the real `imu.c` driver runs in the tests.

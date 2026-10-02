@@ -51,6 +51,11 @@ static const float MOTOR_DIRECTION[4] = { -1.0f, 1.0f, -1.0f, 1.0f }; // left mo
 
 #define ECU_FLAG_HIL 0x01 // bits 4..7 are the online motors, FL first
 
+/* ---- steering wheel panel ---- */
+
+#define PANEL_NODE      17
+#define PANEL_MSG_DIALS 0x01 // u8 torque vectoring %, drive power %, regen %, u8 count
+
 /* ---- HIL, simulator to ECU ---- */
 
 enum {

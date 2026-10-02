@@ -206,7 +206,7 @@ static void lost_simulator_stops_torque(void)
     run(HIL_TIMEOUT_MS + 20);
     const EcuStatus *s = app_status();
     CHECK(!s->hil);
-    CHECK(s->state == ECU_STANDBY);
+    CHECK(s->state == ECU_FAULT);
     CHECK(s->inhibit & INHIBIT_HIL_LOST);
     run(400);
     for (int i = 0; i < 4; i++)
@@ -225,15 +225,28 @@ static void hot_controller_derates_all_wheels(void)
         CHECK_NEAR(motor_torque(i), 0.5f * MOTOR_MAX_TORQUE_NM, 0.1);
 }
 
-static void faulted_controller_drops_to_standby(void)
+static void faulted_controller_latches_a_fault(void)
 {
     boot();
     start_hil_drive(40.0f);
     fake[WHEEL_FR].state  = MC_STATE_FAULT;
     fake[WHEEL_FR].faults = 1u << 3;
     run(30);
-    CHECK(app_status()->state == ECU_STANDBY);
+    CHECK(app_status()->state == ECU_FAULT);
     CHECK(app_status()->inhibit & INHIBIT_MOTOR_FAULT);
+
+    fake[WHEEL_FR].state  = MC_STATE_IDLE; // the cause goes away, the latch stays
+    fake[WHEEL_FR].faults = 0;
+    run(100);
+    CHECK(app_status()->state == ECU_FAULT);
+    CHECK(app_status()->fault & INHIBIT_MOTOR_FAULT);
+    for (int i = 0; i < 4; i++)
+        CHECK(fake[i].state == MC_STATE_IDLE);
+
+    sim_serial_inject("clear\n");
+    run(30);
+    CHECK(app_status()->state == ECU_STANDBY);
+    CHECK(app_status()->fault == 0);
 }
 
 static void missing_controller_blocks_arming(void)
@@ -247,7 +260,7 @@ static void missing_controller_blocks_arming(void)
     CHECK_NEAR(motor_torque(WHEEL_FL), 0.0f, 1e-6);
 }
 
-static void refusing_controller_drops_to_standby(void)
+static void refusing_controller_latches_a_fault(void)
 {
     boot();
     fake[WHEEL_FL].refuse = 1;
@@ -256,7 +269,7 @@ static void refusing_controller_drops_to_standby(void)
     for (int i = 0; i < 4; i++)
         CHECK_NEAR(motor_torque(i), 0.0f, 1e-6); // no one-sided drive
     run(MOTOR_START_MS + 50);
-    CHECK(app_status()->state == ECU_STANDBY);
+    CHECK(app_status()->state == ECU_FAULT);
 }
 
 static void pedals_arm_after_brake_hold(void)
@@ -330,6 +343,36 @@ static void disarm_zeroes_current_at_once(void)
     }
 }
 
+static void send_panel(uint8_t tv, uint8_t power, uint8_t regen)
+{
+    uint8_t data[8] = { tv, power, regen, 0, 0, 0, 0, 0 };
+    sim_can_inject(CAN_ID(PANEL_NODE, PANEL_MSG_DIALS), data, 8);
+}
+
+static void panel_power_dial_limits_torque(void)
+{
+    boot();
+    start_hil_drive(1000.0f);
+    send_panel(100, 50, 100);
+    run(30);
+    for (int i = 0; i < 4; i++)
+        CHECK_NEAR(motor_torque(i), 0.5f * MOTOR_MAX_TORQUE_NM, 0.1);
+    send_panel(100, 0, 100);
+    run(30);
+    for (int i = 0; i < 4; i++)
+        CHECK_NEAR(motor_torque(i), 0.0f, 1e-6);
+}
+
+static void panel_is_optional_and_kept_when_it_goes_quiet(void)
+{
+    boot();
+    start_hil_drive(1000.0f);
+    CHECK_NEAR(app_status()->panel.power, 1.0f, 1e-6); // no panel, no change
+    send_panel(100, 30, 100);
+    run(2000); // far longer than any frame period
+    CHECK_NEAR(app_status()->panel.power, 0.3f, 1e-6);
+}
+
 static void usb_only_power_blocks_pedal_mode(void)
 {
     boot();
@@ -395,9 +438,9 @@ int main(void)
         T(hil_needs_a_fresh_drive_request),
         T(lost_simulator_stops_torque),
         T(hot_controller_derates_all_wheels),
-        T(faulted_controller_drops_to_standby),
+        T(faulted_controller_latches_a_fault),
         T(missing_controller_blocks_arming),
-        T(refusing_controller_drops_to_standby),
+        T(refusing_controller_latches_a_fault),
         T(pedals_arm_after_brake_hold),
         T(pedal_disagreement_cuts_torque_but_stays_armed),
         T(brake_at_standstill_never_drives_backwards),
@@ -407,6 +450,8 @@ int main(void)
         T(own_gyro_is_used_without_hil),
         T(console_reports_status),
         T(status_frame_goes_out),
+        T(panel_power_dial_limits_torque),
+        T(panel_is_optional_and_kept_when_it_goes_quiet),
     };
     return run_tests(cases, sizeof cases / sizeof cases[0]);
 }

@@ -27,7 +27,7 @@ void torque_vectoring(const TvInputs *in, const TorqueLimits *limits, float torq
     float correction = 0.0f;
     if (in->speed_ms > TV_MIN_SPEED_MS) {
         float target = tv_target_yaw_rate(in->speed_ms, in->steering_rad);
-        correction   = TV_KP_NM_PER_RADS * (target - in->yaw_rate);
+        correction   = in->gain * TV_KP_NM_PER_RADS * (target - in->yaw_rate);
     }
 
     // 3. keep both sides inside the limits so the total torque is unchanged

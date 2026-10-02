@@ -10,6 +10,7 @@
 #include "hil.h"
 #include "imu.h"
 #include "motors.h"
+#include "panel.h"
 #include "torque_vectoring.h"
 #include <math.h>
 #include <string.h>
@@ -25,6 +26,7 @@ void app_init(void)
 {
     memset(&status, 0, sizeof status);
     motors_init();
+    panel_init();
     hil_init();
     gps_init();
     driver_inputs_reset();
@@ -52,9 +54,25 @@ static void go_standby(void)
     brake_must_lift = 1;
 }
 
+// A hard stop while driving is latched, so a flickering fault cannot re-arm the car.
+static void latch_fault(uint16_t cause)
+{
+    status.state    = ECU_FAULT;
+    status.fault    = cause;
+    brake_held_ms   = 0;
+    brake_must_lift = 1;
+}
+
 void app_disarm(void)
 {
     go_standby();
+}
+
+void app_clear_fault(void)
+{
+    if (status.state != ECU_FAULT) return;
+    status.state = ECU_STANDBY;
+    status.fault = 0;
 }
 
 /* ---- inputs ---- */
@@ -107,6 +125,7 @@ static void choose_source(uint32_t now)
 
     if (status.hil && (!fresh || !hil->on)) {
         status.hil = 0;
+        if (!fresh && status.state == ECU_DRIVE) latch_fault(INHIBIT_HIL_LOST);
         go_standby();
         if (!fresh) {
             hil_lost    = 1;
@@ -206,7 +225,9 @@ static void update_state(uint32_t now)
         }
         break;
     case ECU_DRIVE:
-        if (hard_stop) go_standby();
+        if (hard_stop) latch_fault(status.inhibit & ~INHIBIT_SOFT);
+        break;
+    case ECU_FAULT:
         break;
     }
     if (status.hil && !hil_inputs()->drive) go_standby();
@@ -227,16 +248,18 @@ static void compute_torque(uint32_t now)
     in.ecu_temp_c   = status.ecu_temp_c;
     in.car_speed_ms = status.speed_ms;
     status.derate   = derate_compute(&in);
+    status.panel    = *panel_dials();
 
     TorqueLimits limits;
-    limits.drive_nm = MOTOR_MAX_TORQUE_NM * status.derate.drive;
-    limits.regen_nm = MOTOR_MAX_TORQUE_NM * status.derate.regen;
+    limits.drive_nm = MOTOR_MAX_TORQUE_NM * status.derate.drive * status.panel.power;
+    limits.regen_nm = MOTOR_MAX_TORQUE_NM * status.derate.regen * status.panel.regen;
 
     TvInputs tv;
     tv.request_nm   = status.request_nm;
     tv.speed_ms     = status.speed_ms;
     tv.steering_rad = status.steering_rad;
     tv.yaw_rate     = status.yaw_rate;
+    tv.gain         = status.panel.tv;
     torque_vectoring(&tv, &limits, status.torque_nm);
 
     if (status.state != ECU_DRIVE || status.inhibit) {
@@ -286,6 +309,7 @@ static void control_step(void)
     status.inhibit = find_inhibits(now);
     update_state(now);
     if (status.state != ECU_STARTUP) status.inhibit &= (uint16_t)~INHIBIT_STARTUP;
+    if (status.state == ECU_FAULT) status.inhibit |= status.fault;
 
     // 3. derate, vector and send
     compute_torque(now);
@@ -298,7 +322,8 @@ void app_poll(void)
     uint32_t id, now = hal_millis();
     uint8_t data[8], len;
     while (hal_can_recv(&id, data, &len)) {
-        if (!motors_handle_frame(id, data, len, now)) hil_handle_frame(id, data, len, now);
+        if (!motors_handle_frame(id, data, len, now) && !panel_handle_frame(id, data, len))
+            hil_handle_frame(id, data, len, now);
     }
 
     uint8_t bytes[32];
@@ -316,7 +341,10 @@ void app_tick(void)
     tick_count++;
     if (tick_count % CONTROL_PERIOD_MS == 0) control_step();
 
-    uint32_t blink = status.state == ECU_DRIVE ? 100u : (status.state == ECU_STANDBY ? 500u : 250u);
+    uint32_t blink = status.state == ECU_FAULT ? 50u
+        : status.state == ECU_DRIVE            ? 100u
+        : status.state == ECU_STANDBY          ? 500u
+                                               : 250u;
     hal_led_set((hal_millis() / blink) % 2);
     console_tick();
     hal_wdg_kick();

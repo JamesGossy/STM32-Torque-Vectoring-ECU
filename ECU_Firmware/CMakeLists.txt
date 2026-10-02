@@ -19,6 +19,7 @@ set(APP_SRC
   app/hil.c
   app/imu.c
   app/motors.c
+  app/panel.c
   app/torque_vectoring.c
 )
 

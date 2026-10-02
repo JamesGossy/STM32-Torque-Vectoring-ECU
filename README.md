@@ -138,6 +138,7 @@ running away. All thresholds are in `config.h`.
 | `STARTUP` | first second: the gyro bias is measured, so the car must be still |
 | `STANDBY` | ready, no torque. Controllers are kept idle |
 | `DRIVE` | torque is sent every 10 ms |
+| `FAULT` | latched after a hard stop while driving. No torque until `clear` on the console or a power cycle |
 
 To arm, press the brake with the throttle released and hold it for 1 s in standby (a
 stand-in until the car has a ready-to-drive button). After any disarm the brake has to be
@@ -146,7 +147,7 @@ request. Arming needs every
 controller online and healthy, main power present (so the pedal sensors are powered), a
 working IMU and a healthy CAN bus.
 
-Any of those failing while driving drops the ECU back to `STANDBY`. Two pedal problems
+Any of those failing while driving latches `FAULT` and keeps the cause in the status frame, so a flickering fault cannot re-arm the car. Two pedal problems
 only zero the torque while they last, as the Formula Student rules ask:
 
 - **Throttle sensor disagreement:** the two throttle sensors differ by more than 10 %
@@ -160,6 +161,15 @@ once, and keeps sending zero current while disarmed. The controllers also stop b
 themselves 250 ms after their setpoints stop, so a crashed or unplugged ECU is safe. The
 watchdog resets the ECU after 100 ms.
 
+## Steering wheel panel
+
+The panel is a CAN node (17) that sends three dial values: torque vectoring strength,
+drive power and regen. They scale the yaw correction and the drive and regen torque
+limits, on top of derating. Without a panel everything stays at 100 %. If the panel goes
+quiet the last values are kept, so a lost cable never raises a limit. The panel lights
+its LEDs from the ECU's `STATUS` frame (state and inhibit bits). The console `status`
+line shows the dial values.
+
 ## CAN bus
 
 Classic CAN at 1 Mbit/s, 11-bit ids of the form `(node << 5) | message`, the scheme the
@@ -170,6 +180,7 @@ motor controllers already use. Floats are little endian. The full list is in
 | --- | --- | --- |
 | 1 to 4 | motor controllers FL, FR, RL, RR | ECU sends `SET_STATE`, `SET_IQ`. They send heartbeat, iq and speed, bus volts and temperature |
 | 16 | this ECU | `STATUS` (state, inhibit bits, derating) and `YAW` (target and measured) every 10 ms |
+| 17 | steering wheel panel | `DIALS`: torque vectoring %, drive power %, regen % (0 to 100) |
 | 16 | HIL simulator | `DRIVER`, `WHEELS_F`, `WHEELS_R`, then `CONTROL` last each tick |
 
 Wheel torque is sent as controller current: 1.47 Nm per amp maps the car motor's 29.4 Nm
