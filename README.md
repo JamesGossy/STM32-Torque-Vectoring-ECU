@@ -266,21 +266,6 @@ its default tunables. `make test-hil` in the simulator repo checks this.
 **On the bench:** the motors are unloaded, so any torque spins them up until speed
 derating holds them just under 10k rpm. Keep them guarded and clamped down.
 
-## Where it came from
-
-This repo started as a full-physics HIL simulation in C: a four-corner car model with
-Pacejka tyres, load transfer and aero, a Stanley steering driver, a racing-line planner,
-and a PID torque vectoring controller walled off behind the same kind of sensor
-interface a real ECU would have. It lapped the FSG 2024 track in about 27 seconds, with
-the actual speed following the planned speed closely:
-
-<div align="center">
-<img src="docs/speed_trace.png" alt="Actual speed tracking the planned target speed over one lap" width="680">
-</div>
-
-That simulation is still in the git history. The controller has now moved onto real
-hardware, and HIL testing uses the Formula Student simulator instead.
-
 ## Not done yet
 
 - Battery and BMS messages, and derating from state of charge.
