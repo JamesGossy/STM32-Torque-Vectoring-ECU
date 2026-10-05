@@ -245,6 +245,24 @@ Without any hardware, `ecu_sim` (built by `make sim`) plays the ECU on the PC an
 simulator talks to it in lock-step. The simulator's `make test-hil` runs its whole lap
 matrix that way.
 
+### Driverless mode
+
+Set `HIL_AUTONOMY=ecu` in the simulator and the ECU does the driving. The simulator sends
+the nearest 16 cones (range in cm, bearing in mrad, colour) as `HIL_MSG_CONE` frames, one
+per cone, ahead of each `CONTROL` frame. Every 10 ms the ECU turns them into a centre line
+(`app/planner.c`), steers with pure pursuit and sets the total torque request with a
+proportional speed controller (`app/autonomy.c`), then sends the result back in
+`ECU_MSG_COMMAND`. Torque vectoring, derating and the state machine work as before.
+
+| Runs on the ECU | Runs on the PC |
+| --- | --- |
+| Cone gating and midpoints, pure pursuit, speed control, steering rate limit | Vehicle model, cone sensor, EKF-SLAM (display only) |
+
+If complete cone scans stop arriving for 50 ms the ECU latches FAULT (`cones-lost`), like
+any other hard stop. The planner and controller are a port of the simulator's own, with
+fixed constants in `config.h`, so laps match the simulator's software autopilot only at
+its default tunables. `make test-hil` in the simulator repo checks this.
+
 **On the bench:** the motors are unloaded, so any torque spins them up until speed
 derating holds them just under 10k rpm. Keep them guarded and clamped down.
 

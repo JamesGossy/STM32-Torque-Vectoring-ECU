@@ -48,6 +48,8 @@ static const float MOTOR_DIRECTION[4] = { -1.0f, 1.0f, -1.0f, 1.0f }; // left mo
 #define ECU_NODE       16
 #define ECU_MSG_STATUS 0x10 // u8 state, flags, u16 inhibit, u8 drive %, regen %, derate, count
 #define ECU_MSG_YAW    0x11 // f32 target yaw rate, f32 measured yaw rate, rad/s
+#define ECU_MSG_COMMAND                                                                            \
+    0x12 // driverless only: f32 steering (steering units), f32 total torque request Nm
 
 #define ECU_FLAG_HIL 0x01 // bits 4..7 are the online motors, FL first
 
@@ -63,11 +65,17 @@ enum {
     HIL_MSG_WHEELS_F = 0x02, // f32 FL, f32 FR wheel speed rad/s
     HIL_MSG_WHEELS_R = 0x03, // f32 RL, f32 RR wheel speed rad/s
     HIL_MSG_CONTROL  = 0x04, // u8 flags, u8 count, u16 spare, f32 yaw rate rad/s
+    HIL_MSG_CONE = 0x05, // u16 range cm, i16 bearing mrad, u8 colour (0 blue, 1 yellow), u8 index,
+                         // u8 cones in scan, u8 scan number (the CONTROL count of the same tick)
 };
 
 // CONTROL is sent last each tick, so it marks a complete set of inputs.
-#define HIL_FLAG_ON    0x01 // use these inputs instead of the ECU's own sensors
-#define HIL_FLAG_DRIVE 0x02 // the simulated driver wants torque
+#define HIL_FLAG_ON       0x01 // use these inputs instead of the ECU's own sensors
+#define HIL_FLAG_DRIVE    0x02 // the simulated driver wants torque
+#define HIL_FLAG_AUTONOMY 0x04 // the ECU steers and sets the torque request from the CONE frames
+
+#define HIL_MAX_CONES                                                                              \
+    16 // nearest cones, one CAN frame each; an empty scan is one frame with count 0
 
 /* ---- TCP link between the simulator and the bus ---- */
 
@@ -109,6 +117,17 @@ static inline int16_t can_get_i16(const uint8_t *data)
     int16_t value;
     memcpy(&value, data, 2);
     return value;
+}
+
+static inline void can_put_u16(uint8_t *data, uint16_t value)
+{
+    data[0] = (uint8_t)value;
+    data[1] = (uint8_t)(value >> 8);
+}
+
+static inline void can_put_i16(uint8_t *data, int16_t value)
+{
+    memcpy(data, &value, 2);
 }
 
 static inline uint16_t can_get_u16(const uint8_t *data)

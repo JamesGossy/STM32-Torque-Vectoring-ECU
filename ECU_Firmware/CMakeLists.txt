@@ -12,6 +12,7 @@ endif()
 
 set(APP_SRC
   app/app.c
+  app/autonomy.c
   app/console.c
   app/derate.c
   app/driver_inputs.c
@@ -20,6 +21,7 @@ set(APP_SRC
   app/imu.c
   app/motors.c
   app/panel.c
+  app/planner.c
   app/torque_vectoring.c
 )
 

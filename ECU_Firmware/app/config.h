@@ -84,6 +84,20 @@ enum { WHEEL_FL, WHEEL_FR, WHEEL_RL, WHEEL_RR };
 #define NTC_BETA      3380.0f
 #define IMU_YAW_SIGN  1.0f // flip if the board is mounted upside down
 
+/* ---- driverless control ---- */
+
+#define AUTO_CRUISE_SPEED_MS   6.0f  // speed on a straight, the sim's g_CRUISE_SPEED_MS
+#define AUTO_LOOKAHEAD_M       3.0f  // how far ahead on the path the car aims
+#define AUTO_SPEED_KP_NM       20.0f // total torque per m/s of speed error
+#define AUTO_MAX_STEERING      2.4f  // steering units, the sim's g_MAX_STEER_RAD
+#define AUTO_MAX_STEERING_RATE 8.0f  // steering units per second
+#define AUTO_MIN_TARGET_M      0.2f  // a target closer than this is ignored
+#define PLAN_MAX_GATE_M        10.0f // a blue and yellow cone further apart are not a gate
+#define PLAN_EDGE_OFFSET_M     2.0f  // how far inside one edge to drive when only that edge is seen
+#define PLAN_MIN_SEGMENT_M     0.2f
+#define PLAN_MIN_POINT_GAP_M   0.3f
+#define CONES_TIMEOUT_MS       50 // no cone frame for this long means perception is lost
+
 /* ---- HIL ---- */
 
 #define HIL_ALLOWED 1 // set to 0 for the car so nothing on the bus can replace the sensors

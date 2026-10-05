@@ -7,6 +7,7 @@
 #include "console.h"
 #include "gps.h"
 #include "hal.h"
+#include "autonomy.h"
 #include "hil.h"
 #include "imu.h"
 #include "motors.h"
@@ -28,6 +29,7 @@ void app_init(void)
     motors_init();
     panel_init();
     hil_init();
+    autonomy_reset();
     gps_init();
     driver_inputs_reset();
     console_init();
@@ -144,12 +146,22 @@ static void gather_inputs(float own_yaw)
     const HilInputs *hil = hil_inputs();
     float wheel_sum      = 0.0f;
 
+    status.autonomy        = 0;
+    status.target_speed_ms = 0.0f;
     if (status.hil) {
         status.steering_rad = hil->steering_rad;
         status.request_nm   = hil->request_nm;
         status.yaw_rate     = hil->yaw_rate;
         for (int wheel = 0; wheel < 4; wheel++)
             wheel_sum += hil->wheel_speed[wheel];
+        if (hil->autonomy) {
+            // The ECU drives: the simulator's own steering and torque request are ignored.
+            AutoCommand command    = autonomy_step(&hil->scan, 0.25f * wheel_sum * WHEEL_RADIUS_M);
+            status.autonomy        = 1;
+            status.steering_rad    = command.steering;
+            status.request_nm      = command.request_nm;
+            status.target_speed_ms = command.target_speed_ms;
+        }
     } else {
         status.steering_rad = status.pedals.steering_rad;
         status.request_nm   = status.pedals.request_nm;
@@ -180,6 +192,8 @@ static uint16_t find_inhibits(uint32_t now)
     if (status.state == ECU_STARTUP) inhibit |= INHIBIT_STARTUP;
     if (!hal_can_ok()) inhibit |= INHIBIT_CAN;
     if (hil_lost) inhibit |= INHIBIT_HIL_LOST;
+    if (status.hil && hil_inputs()->autonomy && !hil_cones_fresh(now))
+        inhibit |= INHIBIT_CONES_LOST;
 
     // the ECU's own sensors only matter when the simulator is not standing in for them
     if (!status.hil) {
@@ -291,6 +305,12 @@ static void send_status(void)
     can_put_f32(data, status.target_yaw_rate);
     can_put_f32(data + 4, status.yaw_rate);
     hal_can_send(CAN_ID(ECU_NODE, ECU_MSG_YAW), data, 8);
+
+    if (status.autonomy) {
+        can_put_f32(data, status.steering_rad);
+        can_put_f32(data + 4, status.request_nm);
+        hal_can_send(CAN_ID(ECU_NODE, ECU_MSG_COMMAND), data, 8);
+    }
 }
 
 /* ---- loops ---- */

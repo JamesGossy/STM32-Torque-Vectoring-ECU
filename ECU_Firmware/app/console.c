@@ -19,7 +19,7 @@ static uint32_t stream_ms;
 
 static const char *STATE_NAMES[]   = { "STARTUP", "STANDBY", "DRIVE", "FAULT" };
 static const char *INHIBIT_NAMES[] = { "startup", "motor-offline", "motor-fault", "no-main-power",
-    "pedal-sensor", "pedal-disagree", "brake+throttle", "hil-lost", "imu", "can" };
+    "pedal-sensor", "pedal-disagree", "brake+throttle", "hil-lost", "imu", "can", "cones-lost" };
 
 static void say(const char *format, ...)
 {

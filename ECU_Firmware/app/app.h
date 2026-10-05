@@ -22,15 +22,18 @@ enum {
     INHIBIT_HIL_LOST       = 1u << 7,
     INHIBIT_IMU            = 1u << 8,
     INHIBIT_CAN            = 1u << 9,
+    INHIBIT_CONES_LOST     = 1u << 10, // driverless: the cone scans stopped arriving
 };
 #define INHIBIT_SOFT (INHIBIT_PEDAL_DISAGREE | INHIBIT_BRAKE_THROTTLE)
 
 typedef struct {
-    uint8_t state;    // ECU_*
-    int hil;          // 1 while the simulator supplies the inputs
-    uint16_t inhibit; // INHIBIT_* bits
-    uint16_t fault;   // what stopped the car, kept until cleared
-    uint8_t online;   // bit per motor controller, FL first
+    uint8_t state;         // ECU_*
+    int hil;               // 1 while the simulator supplies the inputs
+    int autonomy;          // 1 while the ECU is steering and setting torque itself
+    float target_speed_ms; // what the driverless speed controller is aiming for
+    uint16_t inhibit;      // INHIBIT_* bits
+    uint16_t fault;        // what stopped the car, kept until cleared
+    uint8_t online;        // bit per motor controller, FL first
     float speed_ms;
     float steering_rad;
     float request_nm;

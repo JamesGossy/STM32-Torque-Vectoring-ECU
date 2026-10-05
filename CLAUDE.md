@@ -77,6 +77,11 @@ and at least two laps on both tracks.
   off to on edge of the simulator's drive flag.
 - Panel dials (`panel.c`, node 17) scale the yaw correction and the drive and regen limits.
   Default 100 %, last value held if the panel goes quiet.
+- Driverless HIL (`HIL_FLAG_AUTONOMY`): `planner.c` and `autonomy.c` turn the scan from
+  `HIL_MSG_CONE` frames into steering and a torque request, sent back as `ECU_MSG_COMMAND`.
+  The simulator keeps its own copy of the same algorithm, so change both together and keep
+  `make test-hil` in the simulator repo passing (its lap times must match within 5 %).
+  Stale cones latch FAULT (`INHIBIT_CONES_LOST`).
 - `HIL_ALLOWED` in `config.h` must be 0 on the car.
 - `sim/sim.c` only moves time in `sim_run_ms()`, so host tests are exact and repeatable.
   The fake IMU is a register map, so the real `imu.c` driver runs in the tests.

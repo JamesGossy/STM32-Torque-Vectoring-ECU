@@ -5,6 +5,7 @@
 #include "can_protocol.h"
 #include "config.h"
 #include "hal.h"
+#include "local_map.h"
 #include "sim.h"
 #include <string.h>
 
@@ -21,6 +22,11 @@ static FakeMotor fake[4];
 static int hil_on, hil_drive;
 static float hil_steer, hil_request, hil_yaw, hil_wheel;
 static int use_hil;
+static int hil_auto, hil_cones_off; // driverless: send cone frames, or stop sending them
+static ConeScan hil_cones;
+static uint8_t hil_count;
+static float command_steer, command_request;
+static int command_frames;
 
 /* ---- fake motor controllers ---- */
 
@@ -52,6 +58,12 @@ static void fake_listen(void)
         if (id == CAN_ESTOP_ID) {
             for (int i = 0; i < 4; i++)
                 fake[i].state = MC_STATE_IDLE;
+            continue;
+        }
+        if (id == CAN_ID(ECU_NODE, ECU_MSG_COMMAND)) {
+            command_steer   = can_get_f32(data);
+            command_request = can_get_f32(data + 4);
+            command_frames++;
             continue;
         }
         int i = fake_of_node(CAN_NODE(id));
@@ -106,8 +118,26 @@ static void hil_talk(void)
     can_put_f32(data + 4, hil_wheel);
     sim_can_inject(CAN_ID(ECU_NODE, HIL_MSG_WHEELS_F), data, 8);
     sim_can_inject(CAN_ID(ECU_NODE, HIL_MSG_WHEELS_R), data, 8);
+    if (hil_auto) {
+        int send = hil_cones.count ? hil_cones.count : 1; // an empty scan is one frame
+        for (int i = 0; i < send; i++) {
+            if (hil_cones_off) continue;
+            memset(data, 0, 8);
+            if (hil_cones.count) {
+                can_put_u16(data, (uint16_t)lroundf(hil_cones.cone[i].range_m * 100.0f));
+                can_put_i16(data + 2, (int16_t)lroundf(hil_cones.cone[i].bearing_rad * 1000.0f));
+                data[4] = hil_cones.cone[i].colour;
+            }
+            data[5] = (uint8_t)i;
+            data[6] = (uint8_t)hil_cones.count;
+            data[7] = hil_count;
+            sim_can_inject(CAN_ID(ECU_NODE, HIL_MSG_CONE), data, 8);
+        }
+    }
     memset(data, 0, 8);
-    data[0] = (uint8_t)((hil_on ? HIL_FLAG_ON : 0) | (hil_drive ? HIL_FLAG_DRIVE : 0));
+    data[0] = (uint8_t)((hil_on ? HIL_FLAG_ON : 0) | (hil_drive ? HIL_FLAG_DRIVE : 0)
+        | (hil_auto ? HIL_FLAG_AUTONOMY : 0));
+    data[1] = hil_count++;
     can_put_f32(data + 4, hil_yaw);
     sim_can_inject(CAN_ID(ECU_NODE, HIL_MSG_CONTROL), data, 8);
 }
@@ -127,7 +157,9 @@ static void boot(void)
 {
     sim_reset();
     fake_reset();
-    use_hil = hil_on = hil_drive = 0;
+    use_hil = hil_on = hil_drive = hil_auto = hil_cones_off = 0;
+    hil_cones.count                                         = 0;
+    command_frames                                          = 0;
     hil_steer = hil_request = hil_yaw = hil_wheel = 0.0f;
     run(GYRO_CAL_MS + 20);
 }
@@ -429,6 +461,137 @@ static void status_frame_goes_out(void)
     CHECK(seen);
 }
 
+/* ---- driverless ---- */
+
+static void corridor(ConeScan *scan, float bend)
+{
+    scan->count = 0;
+    for (int gate = 1; gate <= 4; gate++) {
+        float x = 3.0f * (float)gate, centre = bend * (float)(gate * gate) * 0.25f;
+        for (int side = 0; side < 2; side++) {
+            float y           = centre + (side ? -1.5f : 1.5f);
+            Cone *cone        = &scan->cone[scan->count++];
+            cone->range_m     = hypotf(x, y);
+            cone->bearing_rad = atan2f(y, x);
+            cone->colour      = side ? CONE_YELLOW : CONE_BLUE;
+        }
+    }
+}
+
+static void start_autonomy(float bend)
+{
+    corridor(&hil_cones, bend);
+    hil_auto = 1;
+    start_hil_drive(0.0f);
+}
+
+static void autonomy_drives_from_cones(void)
+{
+    boot();
+    start_autonomy(0.0f);
+    const EcuStatus *s = app_status();
+    CHECK(s->autonomy);
+    CHECK(s->state == ECU_DRIVE);
+    CHECK_NEAR(s->steering_rad, 0.0f, 0.02);
+    CHECK(s->request_nm > 0.0f); // 5 m/s, aiming for 6
+    CHECK_NEAR(s->target_speed_ms, AUTO_CRUISE_SPEED_MS, 1e-3);
+    float total = 0.0f;
+    for (int i = 0; i < 4; i++)
+        total += motor_torque(i);
+    CHECK_NEAR(total, s->request_nm, 0.5);
+}
+
+static void autonomy_ignores_the_simulators_own_steering_and_torque(void)
+{
+    boot();
+    hil_steer = 2.0f; // what a software autopilot would have asked for
+    start_autonomy(0.0f);
+    CHECK_NEAR(app_status()->steering_rad, 0.0f, 0.02);
+    CHECK(app_status()->request_nm < 100.0f);
+}
+
+static void autonomy_steers_and_reports_the_command(void)
+{
+    boot();
+    start_autonomy(0.5f);
+    run(300);
+    CHECK(app_status()->steering_rad > 0.05f);
+    command_frames = 0;
+    run(20);
+    CHECK(command_frames >= 1);
+    CHECK_NEAR(command_steer, app_status()->steering_rad, 1e-5);
+    CHECK_NEAR(command_request, app_status()->request_nm, 1e-4);
+}
+
+static void autonomy_without_cones_slows_the_car(void)
+{
+    boot();
+    start_autonomy(0.0f);
+    hil_cones.count = 0; // frames still arrive, they just show nothing
+    run(50);
+    CHECK(app_status()->state == ECU_DRIVE);
+    CHECK_NEAR(app_status()->target_speed_ms, 0.0f, 1e-6);
+    CHECK(app_status()->request_nm < 0.0f);
+}
+
+static void stale_cones_latch_a_fault(void)
+{
+    boot();
+    start_autonomy(0.0f);
+    CHECK(app_status()->state == ECU_DRIVE);
+    hil_cones_off = 1;
+    run(100);
+    CHECK(app_status()->state == ECU_FAULT);
+    CHECK(app_status()->fault & INHIBIT_CONES_LOST);
+    for (int i = 0; i < 4; i++)
+        CHECK_NEAR(motor_torque(i), 0.0f, 1e-3);
+    hil_cones_off = 0; // cones back, but the fault stays until cleared
+    run(100);
+    CHECK(app_status()->state == ECU_FAULT);
+}
+
+static void autonomy_will_not_arm_without_cones(void)
+{
+    boot();
+    corridor(&hil_cones, 0.0f);
+    hil_auto = hil_cones_off = 1;
+    start_hil_drive(0.0f);
+    CHECK(app_status()->state == ECU_STANDBY);
+    CHECK(app_status()->inhibit & INHIBIT_CONES_LOST);
+}
+
+static void a_scan_with_a_lost_frame_is_not_used(void)
+{
+    boot();
+    start_autonomy(0.0f);
+    // claim 8 cones but only send 7 of them
+    uint8_t data[8] = { 0 };
+    for (int i = 0; i < 7; i++) {
+        can_put_u16(data, 500);
+        data[5] = (uint8_t)i;
+        data[6] = 8;
+        data[7] = hil_count;
+        sim_can_inject(CAN_ID(ECU_NODE, HIL_MSG_CONE), data, 8);
+    }
+    memset(data, 0, 8);
+    data[0] = HIL_FLAG_ON | HIL_FLAG_DRIVE | HIL_FLAG_AUTONOMY;
+    data[1] = hil_count++;
+    sim_can_inject(CAN_ID(ECU_NODE, HIL_MSG_CONTROL), data, 8);
+    sim_run_ms(10);
+    CHECK(app_status()->state == ECU_DRIVE); // one bad tick is not a fault
+    CHECK_NEAR(app_status()->target_speed_ms, AUTO_CRUISE_SPEED_MS, 1e-3); // the old scan is kept
+}
+
+static void normal_hil_is_unchanged_by_the_cone_frames(void)
+{
+    boot();
+    corridor(&hil_cones, 0.0f);
+    start_hil_drive(40.0f); // cones are not sent, autonomy flag is off
+    CHECK(!app_status()->autonomy);
+    CHECK_NEAR(app_status()->request_nm, 40.0f, 1e-4);
+    CHECK(command_frames == 0);
+}
+
 int main(void)
 {
     const test_case cases[] = {
@@ -452,6 +615,14 @@ int main(void)
         T(status_frame_goes_out),
         T(panel_power_dial_limits_torque),
         T(panel_is_optional_and_kept_when_it_goes_quiet),
+        T(autonomy_drives_from_cones),
+        T(autonomy_ignores_the_simulators_own_steering_and_torque),
+        T(autonomy_steers_and_reports_the_command),
+        T(autonomy_without_cones_slows_the_car),
+        T(stale_cones_latch_a_fault),
+        T(autonomy_will_not_arm_without_cones),
+        T(a_scan_with_a_lost_frame_is_not_used),
+        T(normal_hil_is_unchanged_by_the_cone_frames),
     };
     return run_tests(cases, sizeof cases / sizeof cases[0]);
 }
